@@ -1,19 +1,17 @@
 # -*- coding:utf-8 -*-
 
-'''
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-'''
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import urllib2
 import re
@@ -23,8 +21,12 @@ import uuid
 import random
 import time
 
+__version__ = '0.0.3'
+__all__ = ['Song', 'Artist', 'Album', 'Playlist', 'User', 'Event', 'Radio', 'Connection', 'Client']
+
 CLIENTS = {'htmlshark' : '20101222.59',
            'jsqueue' : '20101222.59'}
+
 REFERER = 'http://grooveshark.com/JSQueue.swf?20110405.03'
 
 POPULAR_TYPE_DAILY = 'daily'
@@ -158,25 +160,6 @@ class Album(object):
         else:
             return None
 
-class Radio(object):
-    def __init__(self, data, radio, connection):
-        self._artists = [artist['ArtistID'] for artist in data]
-        self._radio = radio
-        self._connection = connection
-        self._recent_artists = []
-        self._songs_already_seen = []
-    
-    def _get_song(self):
-        song = Song(self._connection.get_autoplay_song(self._artists, self._radio, self._recent_artists, self._songs_already_seen),
-                    self._connection)
-        self._recent_artists.append(song.artist[1])
-        self._songs_already_seen.append(song.id)
-        return song
-        
-    def get_songs(self):
-        while True:
-            yield self._get_song()        
-        
 class Playlist(object):
     def __init__(self, data, connection):
         self._connection = connection
@@ -274,6 +257,25 @@ class Event(object):
     
     def __str__(self):
         return self.name
+
+class Radio(object):
+    def __init__(self, data, radio, connection):
+        self._artists = [artist['ArtistID'] for artist in data]
+        self._radio = radio
+        self._connection = connection
+        self._recent_artists = []
+        self._songs_already_seen = []
+    
+    def _get_song(self):
+        song = Song(self._connection.get_autoplay_song(self._artists, self._radio, self._recent_artists, self._songs_already_seen),
+                    self._connection)
+        self._recent_artists.append(song.artist[1])
+        self._songs_already_seen.append(song.id)
+        return song
+        
+    def get_songs(self):
+        while True:
+            yield self._get_song()
 
 class Connection(object):
     def __init__(self, session=None, token=None, queue_id=None):
