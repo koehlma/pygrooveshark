@@ -1,0 +1,678 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome to Grooveshark-Python’s documentation! &mdash; Grooveshark-Python v0.0.3 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.0.3',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Grooveshark-Python v0.0.3 documentation" href="#" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li><a href="#">Grooveshark-Python v0.0.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="welcome-to-grooveshark-python-s-documentation">
+<h1>Welcome to Grooveshark-Python&#8217;s documentation!<a class="headerlink" href="#welcome-to-grooveshark-python-s-documentation" title="Permalink to this headline">¶</a></h1>
+<dl class="class">
+<dt id="grooveshark.Client">
+<em class="property">class </em><tt class="descclassname">grooveshark.</tt><tt class="descname">Client</tt><big>(</big><em>session=None</em>, <em>token=None</em>, <em>queue_id=None</em><big>)</big><a class="headerlink" href="#grooveshark.Client" title="Permalink to this definition">¶</a></dt>
+<dd><p>A client for Grooveshark&#8217;s API which supports:</p>
+<ul class="simple">
+<li>radio (songs by genre)</li>
+<li>search for songs, artists, albums, playlists and users</li>
+<li>popular songs</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>session</strong> &#8211; stored session information as returned by <tt class="xref py py-meth docutils literal"><span class="pre">init_session()</span></tt> method.</li>
+<li><strong>token</strong> &#8211; stored token information as returned by <tt class="xref py py-meth docutils literal"><span class="pre">init_token()</span></tt> method.</li>
+<li><strong>queue_id</strong> &#8211; stored queue id as returned by <tt class="xref py py-meth docutils literal"><span class="pre">init_queue()</span></tt> method.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="method">
+<dt id="grooveshark.Client.init">
+<tt class="descname">init</tt><big>(</big><big>)</big><a class="headerlink" href="#grooveshark.Client.init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch Grooveshark&#8217;s session, communication token and queue id.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">tuple: (<tt class="xref py py-meth docutils literal"><span class="pre">init_session()</span></tt>, <tt class="xref py py-meth docutils literal"><span class="pre">init_token()</span></tt>, <tt class="xref py py-meth docutils literal"><span class="pre">init_queue()</span></tt>)</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="grooveshark.Client.init_queue">
+<tt class="descname">init_queue</tt><big>(</big><big>)</big><a class="headerlink" href="#grooveshark.Client.init_queue" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch Grooveshark&#8217;s queue id.
+Make sure to call <tt class="xref py py-meth docutils literal"><span class="pre">init_token()</span></tt> first.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">queue id</td>
+</tr>
+</tbody>
+</table>
+<p>You can store the returned queue id and use it again over the <em>queue_id</em> argument of the <tt class="xref py py-class docutils literal"><span class="pre">Client</span></tt> class.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="grooveshark.Client.init_session">
+<tt class="descname">init_session</tt><big>(</big><big>)</big><a class="headerlink" href="#grooveshark.Client.init_session" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch Grooveshark&#8217;s session.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">dictionary: {&#8216;id&#8217; : session id, &#8216;secret&#8217; : session secret, &#8216;country&#8217; : session country, &#8216;user&#8217; : user id}</td>
+</tr>
+</tbody>
+</table>
+<p>You can store the returned dictionary and use it again over the <em>session</em> argument of the <tt class="xref py py-class docutils literal"><span class="pre">Client</span></tt> class.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="grooveshark.Client.init_token">
+<tt class="descname">init_token</tt><big>(</big><big>)</big><a class="headerlink" href="#grooveshark.Client.init_token" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetch Grooveshark&#8217;s communication token.
+Make sure to call <tt class="xref py py-meth docutils literal"><span class="pre">init_session()</span></tt> first.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">dictionary: {&#8216;token&#8217; : communication token, &#8216;time&#8217; : actual time}</td>
+</tr>
+</tbody>
+</table>
+<p>You can store the returned dictionary and use it again over the <em>token</em> argument of the <tt class="xref py py-class docutils literal"><span class="pre">Client</span></tt> class.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="grooveshark.Client.popular">
+<tt class="descname">popular</tt><big>(</big><em>period='daily'</em><big>)</big><a class="headerlink" href="#grooveshark.Client.popular" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get popular songs.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>period</strong> &#8211; time period</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">a list of <tt class="xref py py-class docutils literal"><span class="pre">Song</span></tt> objects</td>
+</tr>
+</tbody>
+</table>
+<p>Time periods:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="47%" />
+<col width="53%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Constant</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">POPULAR_TYPE_DAILY</span></tt></td>
+<td>Popular songs of this day</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">POPULAR_TYPE_MONTHLY</span></tt></td>
+<td>Popular songs of this month</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="grooveshark.Client.radio">
+<tt class="descname">radio</tt><big>(</big><em>radio</em><big>)</big><a class="headerlink" href="#grooveshark.Client.radio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get songs belong to a specific genre.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>radio</strong> &#8211; genre to listen to</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body">a <tt class="xref py py-class docutils literal"><span class="pre">Radio</span></tt> object</td>
+</tr>
+</tbody>
+</table>
+<p>Genres:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="53%" />
+<col width="47%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Constant</th>
+<th class="head">Genre</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_RAP</span></tt></td>
+<td>Rap</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_R_AND_B</span></tt></td>
+<td>R&amp;B</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_ROCK</span></tt></td>
+<td>Rock</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_ALTERNATIVE</span></tt></td>
+<td>Alternative</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_METAL</span></tt></td>
+<td>Metal</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_HIP_HOP</span></tt></td>
+<td>Hip Hop</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_JAZZ</span></tt></td>
+<td>Jazz</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_POP</span></tt></td>
+<td>Pop</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_ELECTRONICA</span></tt></td>
+<td>Electronica</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_TRANCE</span></tt></td>
+<td>Trance</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_AMBIENT</span></tt></td>
+<td>Ambient</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_COUNTRY</span></tt></td>
+<td>Country</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_BLUEGRASS</span></tt></td>
+<td>Bluegrass</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_OLDIES</span></tt></td>
+<td>Oldies</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_PUNK</span></tt></td>
+<td>Punk</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_FOLK</span></tt></td>
+<td>Folk</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_INDIE</span></tt></td>
+<td>Indie</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_REGGAE</span></tt></td>
+<td>Reggae</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_EXPERIMENTAL</span></tt></td>
+<td>Experimental</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_LATIN</span></tt></td>
+<td>Latin</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_CLASSICAL</span></tt></td>
+<td>Classic</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_BLUES</span></tt></td>
+<td>Blues</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">RADIO_CLASSIC_ROCK</span></tt></td>
+<td>Oldies</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="grooveshark.Client.search">
+<tt class="descname">search</tt><big>(</big><em>query</em>, <em>type='Songs'</em><big>)</big><a class="headerlink" href="#grooveshark.Client.search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Search for songs, artists, albums, playlists, users and events.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>query</strong> &#8211; search string</li>
+<li><strong>radio</strong> &#8211; type to search for</li>
+</ul>
+</td>
+</tr>
+<tr class="field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">a list of <tt class="xref py py-class docutils literal"><span class="pre">Song</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">Artist</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">Album</span></tt>, <tt class="xref py py-class docutils literal"><span class="pre">Playlist</span></tt> or <tt class="xref py py-class docutils literal"><span class="pre">User</span></tt> objects</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Search Types:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="50%" />
+<col width="50%" />
+</colgroup>
+<thead valign="bottom">
+<tr><th class="head">Constant</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">SEARCH_TYPE_SONGS</span></tt></td>
+<td>Search for songs</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">SEARCH_TYPE_ARTISTS</span></tt></td>
+<td>Search for artists</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">SEARCH_TYPE_ALBUMS</span></tt></td>
+<td>Search for albums</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">SEARCH_TYPE_PLAYLISTS</span></tt></td>
+<td>Search for playlists</td>
+</tr>
+<tr><td><tt class="xref py py-const docutils literal"><span class="pre">SEARCH_TYPE_USERS</span></tt></td>
+<td>Search for users</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="grooveshark.Picture">
+<em class="property">class </em><tt class="descclassname">grooveshark.</tt><tt class="descname">Picture</tt><big>(</big><em>url</em><big>)</big><a class="headerlink" href="#grooveshark.Picture" title="Permalink to this definition">¶</a></dt>
+<dd><p>Could be an album cover or a user picture.
+Do not use this class directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><strong>url</strong> &#8211; image url</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="grooveshark.Picture.data">
+<tt class="descname">data</tt><a class="headerlink" href="#grooveshark.Picture.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>raw image data</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.Picture.type">
+<tt class="descname">type</tt><a class="headerlink" href="#grooveshark.Picture.type" title="Permalink to this definition">¶</a></dt>
+<dd><p>image type for example png or jpg</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="grooveshark.Stream">
+<em class="property">class </em><tt class="descclassname">grooveshark.</tt><tt class="descname">Stream</tt><big>(</big><em>ip</em>, <em>key</em><big>)</big><a class="headerlink" href="#grooveshark.Stream" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get song&#8217;s raw data.
+Do not use this class directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>ip</strong> &#8211; streaming server adress</li>
+<li><strong>key</strong> &#8211; streaming key required to get the stream</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="grooveshark.Stream.data">
+<tt class="descname">data</tt><a class="headerlink" href="#grooveshark.Stream.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>A file-like object containing song&#8217;s raw data.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.Stream.size">
+<tt class="descname">size</tt><a class="headerlink" href="#grooveshark.Stream.size" title="Permalink to this definition">¶</a></dt>
+<dd><p>Size of the song&#8217;s raw data in bytes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="grooveshark.Album">
+<em class="property">class </em><tt class="descclassname">grooveshark.</tt><tt class="descname">Album</tt><big>(</big><em>id</em>, <em>name</em>, <em>artist</em>, <em>cover</em>, <em>connection</em><big>)</big><a class="headerlink" href="#grooveshark.Album" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents an album.
+Do not use this class directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> &#8211; internal album id</li>
+<li><strong>name</strong> &#8211; name</li>
+<li><strong>artist</strong> &#8211; artist as <tt class="xref py py-class docutils literal"><span class="pre">Artist</span></tt> object</li>
+<li><strong>cover</strong> &#8211; cover as <tt class="xref py py-class docutils literal"><span class="pre">Picture</span></tt> object</li>
+<li><strong>connection</strong> &#8211; underlying <tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt> object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="grooveshark.Album.artist">
+<tt class="descname">artist</tt><a class="headerlink" href="#grooveshark.Album.artist" title="Permalink to this definition">¶</a></dt>
+<dd><p><tt class="xref py py-class docutils literal"><span class="pre">Artist</span></tt> object of album&#8217;s artist</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.Album.cover">
+<tt class="descname">cover</tt><a class="headerlink" href="#grooveshark.Album.cover" title="Permalink to this definition">¶</a></dt>
+<dd><p>album cover as <tt class="xref py py-class docutils literal"><span class="pre">Picture</span></tt> object</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.Album.id">
+<tt class="descname">id</tt><a class="headerlink" href="#grooveshark.Album.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>internal album id</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.Album.name">
+<tt class="descname">name</tt><a class="headerlink" href="#grooveshark.Album.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>album&#8217;s name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.Album.songs">
+<tt class="descname">songs</tt><a class="headerlink" href="#grooveshark.Album.songs" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of album&#8217;s songs as <tt class="xref py py-class docutils literal"><span class="pre">Song</span></tt> objects</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="grooveshark.Artist">
+<em class="property">class </em><tt class="descclassname">grooveshark.</tt><tt class="descname">Artist</tt><big>(</big><em>id</em>, <em>name</em>, <em>connection</em><big>)</big><a class="headerlink" href="#grooveshark.Artist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents an artist.
+Do not use this class directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> &#8211; internal artist id</li>
+<li><strong>name</strong> &#8211; name</li>
+<li><strong>connection</strong> &#8211; underlying <tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt> object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="grooveshark.Artist.id">
+<tt class="descname">id</tt><a class="headerlink" href="#grooveshark.Artist.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>internal artist id</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.Artist.name">
+<tt class="descname">name</tt><a class="headerlink" href="#grooveshark.Artist.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>artist&#8217;s name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.Artist.similar">
+<tt class="descname">similar</tt><a class="headerlink" href="#grooveshark.Artist.similar" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of similar artists as <tt class="xref py py-class docutils literal"><span class="pre">Artist</span></tt> objects</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.Artist.songs">
+<tt class="descname">songs</tt><a class="headerlink" href="#grooveshark.Artist.songs" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of artist&#8217;s songs as <tt class="xref py py-class docutils literal"><span class="pre">Song</span></tt> objects</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="grooveshark.Song">
+<em class="property">class </em><tt class="descclassname">grooveshark.</tt><tt class="descname">Song</tt><big>(</big><em>id</em>, <em>name</em>, <em>artist</em>, <em>album</em>, <em>track</em>, <em>duration</em>, <em>popularity</em>, <em>connection</em><big>)</big><a class="headerlink" href="#grooveshark.Song" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a song.
+Do not use this class directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> &#8211; internal song id</li>
+<li><strong>name</strong> &#8211; name</li>
+<li><strong>artist</strong> &#8211; artist as <tt class="xref py py-class docutils literal"><span class="pre">Artist</span></tt> object</li>
+<li><strong>album</strong> &#8211; album as <tt class="xref py py-class docutils literal"><span class="pre">Album</span></tt> object</li>
+<li><strong>track</strong> &#8211; track number</li>
+<li><strong>duration</strong> &#8211; estimate song duration</li>
+<li><strong>popularity</strong> &#8211; populaity</li>
+<li><strong>connection</strong> &#8211; underlying <tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt> object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="grooveshark.Song.album">
+<tt class="descname">album</tt><a class="headerlink" href="#grooveshark.Song.album" title="Permalink to this definition">¶</a></dt>
+<dd><p>album as <tt class="xref py py-class docutils literal"><span class="pre">Album</span></tt> object</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.Song.artist">
+<tt class="descname">artist</tt><a class="headerlink" href="#grooveshark.Song.artist" title="Permalink to this definition">¶</a></dt>
+<dd><p>artist as <tt class="xref py py-class docutils literal"><span class="pre">Artist</span></tt> object</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.Song.duration">
+<tt class="descname">duration</tt><a class="headerlink" href="#grooveshark.Song.duration" title="Permalink to this definition">¶</a></dt>
+<dd><p>estimate song duration</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.Song.id">
+<tt class="descname">id</tt><a class="headerlink" href="#grooveshark.Song.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>internal song id</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.Song.name">
+<tt class="descname">name</tt><a class="headerlink" href="#grooveshark.Song.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.Song.popularity">
+<tt class="descname">popularity</tt><a class="headerlink" href="#grooveshark.Song.popularity" title="Permalink to this definition">¶</a></dt>
+<dd><p>populaity</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.Song.stream">
+<tt class="descname">stream</tt><a class="headerlink" href="#grooveshark.Song.stream" title="Permalink to this definition">¶</a></dt>
+<dd><p><tt class="xref py py-class docutils literal"><span class="pre">Stream</span></tt> object for playing</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.Song.track">
+<tt class="descname">track</tt><a class="headerlink" href="#grooveshark.Song.track" title="Permalink to this definition">¶</a></dt>
+<dd><p>track number</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="grooveshark.User">
+<em class="property">class </em><tt class="descclassname">grooveshark.</tt><tt class="descname">User</tt><big>(</big><em>id</em>, <em>username</em>, <em>picture</em>, <em>city</em>, <em>sex</em>, <em>country</em>, <em>connection</em>, <em>complete=False</em><big>)</big><a class="headerlink" href="#grooveshark.User" title="Permalink to this definition">¶</a></dt>
+<dd><p>Represents a user.
+Do not use this class directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>id</strong> &#8211; internal user id</li>
+<li><strong>username</strong> &#8211; username</li>
+<li><strong>picture</strong> &#8211; picture as <tt class="xref py py-class docutils literal"><span class="pre">Picture</span></tt> object</li>
+<li><strong>city</strong> &#8211; city</li>
+<li><strong>sex</strong> &#8211; sex</li>
+<li><strong>country</strong> &#8211; country</li>
+<li><strong>connection</strong> &#8211; underlying <tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt> object</li>
+<li><strong>complete</strong> &#8211; <tt class="xref docutils literal"><span class="pre">True</span></tt> if some user information is missing</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="grooveshark.User.city">
+<tt class="descname">city</tt><a class="headerlink" href="#grooveshark.User.city" title="Permalink to this definition">¶</a></dt>
+<dd><p>city</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.User.country">
+<tt class="descname">country</tt><a class="headerlink" href="#grooveshark.User.country" title="Permalink to this definition">¶</a></dt>
+<dd><p>country</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.User.id">
+<tt class="descname">id</tt><a class="headerlink" href="#grooveshark.User.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>internal user id</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.User.name">
+<tt class="descname">name</tt><a class="headerlink" href="#grooveshark.User.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.User.picture">
+<tt class="descname">picture</tt><a class="headerlink" href="#grooveshark.User.picture" title="Permalink to this definition">¶</a></dt>
+<dd><p>picture as <tt class="xref py py-class docutils literal"><span class="pre">Picture</span></tt> object</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="grooveshark.User.sex">
+<tt class="descname">sex</tt><a class="headerlink" href="#grooveshark.User.sex" title="Permalink to this definition">¶</a></dt>
+<dd><p>sex</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="grooveshark.Playlist">
+<em class="property">class </em><tt class="descclassname">grooveshark.</tt><tt class="descname">Playlist</tt><big>(</big><em>id</em>, <em>name</em>, <em>user</em>, <em>variety</em>, <em>num_artists</em>, <em>num_songs</em>, <em>about</em>, <em>rank</em>, <em>score</em>, <em>connection</em><big>)</big><a class="headerlink" href="#grooveshark.Playlist" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="grooveshark.Radio">
+<em class="property">class </em><tt class="descclassname">grooveshark.</tt><tt class="descname">Radio</tt><big>(</big><em>artists</em>, <em>radio</em>, <em>connection</em><big>)</big><a class="headerlink" href="#grooveshark.Radio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Listen to songs by specifc genre.
+Do not use this class directly.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>artists</strong> &#8211; list of artist ids</li>
+<li><strong>radio</strong> &#8211; the genre (see <tt class="xref py py-class docutils literal"><span class="pre">Client</span></tt>&#8216;s <tt class="xref py py-meth docutils literal"><span class="pre">radio()</span></tt> method)</li>
+<li><strong>connection</strong> &#8211; the underlying <tt class="xref py py-class docutils literal"><span class="pre">Connection</span></tt> object</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<dl class="attribute">
+<dt id="grooveshark.Radio.song">
+<tt class="descname">song</tt><a class="headerlink" href="#grooveshark.Radio.song" title="Permalink to this definition">¶</a></dt>
+<dd><p><tt class="xref py py-class docutils literal"><span class="pre">Song</span></tt> object of next song to play</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li><a href="#">Grooveshark-Python v0.0.3 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2011, linuxmaxi.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.7.
+    </div>
+  </body>
+</html>

@@ -10,17 +10,17 @@ client = grooveshark.Client()
 client.init()
 null = open('/dev/null', 'wb')
 for i, song in enumerate(client.popular()):
-    print '%i: %s - %s - %s' % (i + 1, song.name, song.artist[0], song.album[0])
-    stream, size = song.get_stream()
+    print '%i: %s - %s - %s' % (i + 1, song.name, song.artist.name, song.album.name)
+    stream = song.stream
     output = tempfile.NamedTemporaryFile(suffix='.mp3', prefix='grooveshark_')
     process = None
     try:
-        output.write(stream.read(524288))
+        output.write(stream.data.read(524288))
         process = subprocess.Popen(['/usr/bin/mplayer', output.name], stdout=null, stderr=null)
-        data = stream.read(2048)
+        data = stream.data.read(2048)
         while data:
             output.write(data)
-            data = stream.read(2048)
+            data = stream.data.read(2048)
         process.wait()
     except KeyboardInterrupt:
         if process:
