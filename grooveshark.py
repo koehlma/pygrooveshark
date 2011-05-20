@@ -14,6 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import urllib2
+import contextlib
 import re
 import json
 import hashlib
@@ -29,6 +30,7 @@ CLIENTS = {'htmlshark' : '20101222.59',
 
 REFERER = 'http://grooveshark.com/JSQueue.swf?20110405.03'
 HEADER_USER_AGENT = {'User-Agent' : 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10'}
+ALBUM_COVER_URL = 'http://beta.grooveshark.com/static/amazonart/'
 
 POPULAR_TYPE_DAILY = 'daily'
 POPULAR_TYPE_MONTHLY = 'monthly'
@@ -91,7 +93,8 @@ class Picture(object):
         '''
         if not self._data:
             request = urllib2.Request(self._url, headers=HEADER_USER_AGENT)
-            self._data = urllib2.urlopen(request).read()
+            with contextlib.closing(urllib2.urlopen(request)) as response:
+                self._data = response.read()
         return self._data
 
 class Stream(object):
@@ -109,7 +112,7 @@ class Stream(object):
                                   headers=HEADER_USER_AGENT)
         self._data = urllib2.urlopen(request)
         self._size = int(self.data.info().getheader('Content-Length'))
-    
+       
     @property
     def data(self):
         '''
@@ -131,17 +134,21 @@ class Album(object):
         
     :param id: internal album id
     :param name: name
-    :param artist: artist as :class:`Artist` object
-    :param cover: cover as :class:`Picture` object
+    :param artist_id: artist's id to generate an :py:class:`Artist` object
+    :param artist_name: artist's name to generate an :py:class:`Artist` object
+    :param cover_url: album's cover to generate an :class:`Album` object
     :param connection: underlying :class:`Connection` object
     '''
-    def __init__(self, id, name, artist, cover, connection):
+    def __init__(self, id, name, artist_id, artist_name, cover_url, connection):
         self._connection = connection
         self._id = id
         self._name = name
-        self._artist = artist
-        self._cover = cover
-        self._songs = []
+        self._artist_id = artist_id
+        self._artist_name = artist_name
+        self._cover_url = cover_url
+        self._songs = None
+        self._cover = None
+        self._artist = None
 
     def __str__(self):
         return '%s - %s' % (self.name, self.artist.name)
@@ -151,7 +158,7 @@ class Album(object):
         '''
         internal album id
         '''
-        return self.id
+        return self._id
     
     @property
     def name(self):
@@ -165,6 +172,8 @@ class Album(object):
         '''
         :class:`Artist` object of album's artist
         '''
+        if not self._artist:
+            self._artist = Artist(self._artist_id, self._artist_name, self._connection)
         return self._artist
     
     @property
@@ -172,26 +181,20 @@ class Album(object):
         '''
         album cover as :class:`Picture` object
         '''
-        return self._cover
+        if self._cover_url:
+            if not self._cover:
+                self._cover = Picture(self._cover_url)
+            return self._cover
     
     @property
     def songs(self):
         '''
-        list of album's songs as :class:`Song` objects
+        generator generates album's songs as :class:`Song` objects
         '''
         if not self._songs:
-            songs = self._connection.request('albumGetSongs', {'albumID' : self.id, 'isVerified' : True, 'offset' : 0},
-                                             self._connection.header('albumGetSongs'))[1]['songs']
-            for song in songs:
-                if song['CoverArtFilename']:
-                    cover = Picture('http://beta.grooveshark.com/static/amazonart/m%s' % (song['CoverArtFilename']))
-                else:
-                    cover = None
-                artist = Artist(song['ArtistID'], song['ArtistName'], self._connection)
-                album = Album(song['AlbumID'], song['AlbumName'], artist, cover, self._connection)
-                self._songs.append(Song(song['SongID'], song['Name'], artist, album, song['TrackNum'],
-                                        song['EstimateDuration'], song['Popularity'], self._connection))
-        return self._songs
+            self._songs = self._connection.request('albumGetSongs', {'albumID' : self.id, 'isVerified' : True, 'offset' : 0},
+                                                   self._connection.header('albumGetSongs'))[1]['songs']
+        return (Song.from_request(song, self._connection) for song in self._songs)
 
 class Artist(object):
     '''
@@ -207,8 +210,8 @@ class Artist(object):
         self._id = id
         self._name = name
         self._similar = None
-        self._songs = []
-
+        self._songs = None
+        
     def __str__(self):
         return self.name
 
@@ -217,7 +220,7 @@ class Artist(object):
         '''
         internal artist id
         '''
-        return self.id
+        return self._id
     
     @property
     def name(self):
@@ -229,33 +232,23 @@ class Artist(object):
     @property
     def similar(self):
         '''
-        list of similar artists as :class:`Artist` objects
+        generator generates similar artists as :class:`Artist` objects
         '''
         if not self._similar:
-            artists = self._connection.request('artistGetSimilarArtists', {'artistID' : self.id},
-                                               self._connection.header('artistGetSimilarArtists'))[1]['SimilarArtists']
-            self._similar = [Artist(artist['ArtistID'], artist['Name'], self._connection) for artist in artists]
-        return self._similar
+            self._similar = self._connection.request('artistGetSimilarArtists', {'artistID' : self.id},
+                                                     self._connection.header('artistGetSimilarArtists'))[1]['SimilarArtists']
+        return (Artist(artist['ArtistID'], artist['Name'], self._connection) for artist in self._similar)
     
     @property
     def songs(self):
         '''
-        list of artist's songs as :class:`Song` objects
+        generator generates artist's songs as :class:`Song` objects
         '''
         if not self._songs:
-            songs = self._connection.request('artistGetSongs', {'artistID' : self.id, 'isVerified' : True, 'offset' : 0},
-                                             self._connection.header('artistGetSongs'))[1]['songs']
-            for song in songs:
-                if song['CoverArtFilename']:
-                    cover = Picture('http://beta.grooveshark.com/static/amazonart/m%s' % (song['CoverArtFilename']))
-                else:
-                    cover = None
-                artist = Artist(song['ArtistID'], song['ArtistName'], self._connection)
-                album = Album(song['AlbumID'], song['AlbumName'], artist, cover, self._connection)
-                self._songs.append(Song(song['SongID'], song['Name'], artist, album, song['TrackNum'],
-                                        song['EstimateDuration'], song['Popularity'], self._connection))
-        return self._songs
-
+            self._songs = self._connection.request('artistGetSongs', {'artistID' : self.id, 'isVerified' : True, 'offset' : 0},
+                                                   self._connection.header('artistGetSongs'))[1]['songs']
+        return (Song.from_request(song, self._connection) for song in self._songs)
+             
 class Song(object):
     '''
     Represents a song.
@@ -263,25 +256,40 @@ class Song(object):
         
     :param id: internal song id
     :param name: name
-    :param artist: artist as :class:`Artist` object
-    :param album: album as :class:`Album` object
+    :param artist_id: artist's id to generate an :py:class:`Artist` object
+    :param artist_name: artist's name to generate an :py:class:`Artist` object
+    :param album_id: album's id to generate an :class:`Album` object
+    :param album_name: album's name to generate an :class:`Album` object
+    :param cover_url: album's cover to generate an :class:`Album` object
     :param track: track number
     :param duration: estimate song duration
     :param popularity: populaity
     :param connection: underlying :class:`Connection` object
     '''
-    def __init__(self, id, name, artist, album, track, duration, popularity, connection):
+    def __init__(self, id, name, artist_id, artist_name, album_id, album_name, cover_url, track, duration, popularity, connection):
         self._connection = connection
         self._id = id
         self._name = name
-        self._artist = artist
-        self._album = album
+        self._artist_id = artist_id
+        self._artist_name = artist_name
+        self._album_id = album_id
+        self._album_name = album_name
+        self._album_id = album_id
+        self._album_name = album_name
+        self._cover_url = cover_url
         self._track = track
         self._duration = duration
         self._popularity = popularity
+        self._artist = None
+        self._album = None
         
     def __str__(self):
         return '%s - %s - %s' % (self.name, self.artist.name, self.album.name)
+    
+    @classmethod
+    def from_request(cls, song, connection):
+        return cls(song['SongID'], song['Name'], song['ArtistID'], song['ArtistName'], song['AlbumID'], song['AlbumName'],
+                   song['CoverArtFilename'], song['TrackNum'], song['EstimateDuration'], song['Popularity'], connection)
     
     @property
     def id(self):
@@ -302,6 +310,8 @@ class Song(object):
         '''
         artist as :class:`Artist` object
         '''
+        if not self._artist:
+            self._artist = Artist(self._artist_id, self._artist_name, self._connection)
         return self._artist
     
     @property
@@ -309,6 +319,8 @@ class Song(object):
         '''
         album as :class:`Album` object
         '''
+        if not self._album:
+            self._album = Album(self._album_id, self._album_name, self._artist_id, self._artist_name, self._cover_url, self._connection)
         return self._album
     
     @property
@@ -356,18 +368,19 @@ class User(object):
     :param connection: underlying :class:`Connection` object
     :param complete: ``True`` if some user information is missing 
     '''
-    def __init__(self, id, username, picture, city, sex, country, connection, complete=False):
+    def __init__(self, id, username, picture_url, city, sex, country, connection, complete=False):
         self._connection = connection
         self._id = id
         self._name = username
-        self._picture = picture
+        self._picture_url = picture_url
         self._city = city
         self._sex = sex
         self._country = country
         self._complete = complete
+        self._picture = None
     
     def __str__(self):
-        return self.username
+        return self.name
     
     def _complete_information(self):
         '''
@@ -402,6 +415,8 @@ class User(object):
         '''
         if self._complete:
             self._complete_information()
+        if not self._picture and self._picture_url:
+            self._picture = Picture(self._picture_url)
         return self._picture
     
     @property
@@ -432,37 +447,114 @@ class User(object):
         return self._sex
 
 class Playlist(object):
-    def __init__(self, id, name, user, variety, num_artists, num_songs, about, rank, score, connection):
+    '''
+    Represents a playlist.
+    Do not use this class directly.
+        
+    :param id: internal playlist id
+    :param name: name    
+    :param user_id: user's id who owns the playlist 
+    :param user_name: user's name who owns the playlist 
+    :param variety: variety
+    :param num_artists: number of artists
+    :param num_songs: number of songs
+    :param about: about
+    :param rank: song's rank
+    :param score: song's score
+    :param connection: underlying :class:`Connection` object
+    '''
+    def __init__(self, id, name, user_id, user_name, variety, num_artists, num_songs, about, rank, score, connection):
         self._connection = connection
-        self.id = id
-        self.name = name
-        self.user = user
-        self.variety = variety
-        self.num_artists = num_artists
-        self.num_songs = num_songs
-        self.about = about
-        self.rank = rank
-        self.score = score
-        self._songs = []
+        self._id = id
+        self._name = name
+        self._user_id = user_id
+        self._user_name = user_name
+        self._variety = variety
+        self._num_artists = num_artists
+        self._num_songs = num_songs
+        self._about = about
+        self._rank = rank
+        self._score = score
+        self._songs = None
+        self._user = None
     
     def __str__(self):
-        return '%s - %s' % (self.name, self.user.username)
+        return '%s - %s' % (self.name, self.user.name)
+
+    @property
+    def id(self):
+        '''
+        internal playlist id
+        '''
+        return self._id
+    
+    @property
+    def name(self):
+        '''
+        name
+        '''
+        return self._name
+    
+    @property
+    def variety(self):
+        '''
+        variety of songs
+        '''
+        return self._variety
+    
+    @property
+    def num_artists(self):
+        '''
+        number of artists
+        '''
+        return self._num_artists
+    
+    @property
+    def num_songs(self):
+        '''
+        number of songs
+        '''
+        return self._num_songs
+    
+    @property
+    def about(self):
+        '''
+        about
+        '''
+        return self._about
+
+    @property
+    def rank(self):
+        '''
+        playlist's rank
+        '''
+        return self._rank
+    
+    @property
+    def score(self):
+        '''
+        playlist's score
+        '''
+        return self._score
+
+    @property
+    def user(self):
+        '''
+        user owns the playlist as :class:`User` object
+        '''
+        if not self._user:
+            self._user = User(self._user_id, self._user_name, None, None, None, None, self._connection, True)
+        return self._user
     
     @property
     def songs(self):
+        '''
+        generator generates playlist's :class:`Song` objects
+        '''
         if not self._songs:
-            songs = self._connection.request('playlistGetSongs', {'playlistID' : self.id},
-                                             self._connection.header('playlistGetSongs'))[1]['Songs']
-            for song in songs:
-                if song['CoverArtFilename']:
-                    cover = Picture('http://beta.grooveshark.com/static/amazonart/m%s' % (song['CoverArtFilename']))
-                else:
-                    cover = None
-                artist = Artist(song['ArtistID'], song['ArtistName'], self._connection)
-                album = Album(song['AlbumID'], song['AlbumName'], artist, cover, self._connection)
-                self._songs.append(Song(song['SongID'], song['Name'], artist, album, song['TrackNum'],
-                                        song['EstimateDuration'], song['Popularity'], self._connection))
-            return self._songs
+            self._songs = self._connection.request('playlistGetSongs', {'playlistID' : self.id},
+                                                   self._connection.header('playlistGetSongs'))[1]['Songs']
+        return (Song.from_request(song, self._connection) for song in self._songs)
 
 class Radio(object):
     '''
@@ -493,14 +585,8 @@ class Radio(object):
                                                             'songIDsAlreadySeen' : self._songs_already_seen, 'maxDuration' : 1500,
                                                             'minDuration' : 60, 'frowns' : []},
                                         self._connection.header('autoplayGetSong', 'jsqueue'))[1]
-        if song['CoverArtUrl']:
-            cover = Picture(song['CoverArtUrl'])
-        else:
-            cover = None
-        artist = Artist(song['ArtistID'], song['ArtistName'], self._connection)
-        album = Album(song['AlbumID'], song['AlbumName'], artist, cover, self._connection)
-        return Song(song['SongID'], song['SongName'], artist, album, None,
-                    song['EstimateDuration'], None, self._connection)
+        return Song(song['SongID'], song['SongName'], song['ArtistID'], song['ArtistName'], song['AlbumID'], song['AlbumName'],
+                    song['CoverArtUrl'], None, song['EstimateDuration'], None, self._connection)
 
 class Connection(object):
     '''
@@ -554,11 +640,11 @@ class Connection(object):
         Request session id and country, calculate communication secret
         '''
         request = urllib2.Request('http://grooveshark.com', headers = {'User-Agent' : 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10'})
-        response = urllib2.urlopen(request)
-        self._session = re.search('PHPSESSID=([a-z0-9]*)', response.info().getheader('Set-Cookie')).group(1)
-        self._secret = hashlib.md5(self._session).hexdigest()
-        config = json.loads(re.search(r'\<script type="text/javascript"\>window\.gsConfig = (\{.*\});\<\/script\>', response.read()).group(1))
-        self.country = config['country']
+        with contextlib.closing(urllib2.urlopen(request)) as response:
+            self._session = re.search('PHPSESSID=([a-z0-9]*)', response.info().getheader('Set-Cookie')).group(1)
+            self._secret = hashlib.md5(self._session).hexdigest()
+            config = json.loads(re.search(r'\<script type="text/javascript"\>window\.gsConfig = (\{.*\});\<\/script\>', response.read()).group(1))
+            self.country = config['country']
     
     def _get_token(self):
         '''
@@ -621,8 +707,8 @@ class Connection(object):
                            'header' : header})
         request = urllib2.Request('https://grooveshark.com/more.php?%s' % (method), data = data,
                                   headers = self._json_request_header())
-        response = urllib2.urlopen(request)
-        return response.info(), json.loads(response.read())['result']
+        with contextlib.closing(urllib2.urlopen(request)) as response:
+            return response.info(), json.loads(response.read())['result']
 
 class Client(object):
     '''
@@ -742,60 +828,33 @@ class Client(object):
                                            self._connection.header('getArtistsForTagRadio', 'jsqueue'))[1]
         return Radio(artists, radio, self._connection)
     
-    def _parse_songs(self, result):
+    def _parse_album(self, album):
         '''
-        Parse search json-data and create a list of :class:`Song` objects.
+        Parse search json-data and create an :class:`Album` object.
         '''
-        songs = []
-        for song in result:
-            if song['CoverArtFilename']:
-                cover = Picture('http://beta.grooveshark.com/static/amazonart/m%s' % (song['CoverArtFilename']))
-            else:
-                cover = None
-            artist = Artist(song['ArtistID'], song['ArtistName'], self._connection)
-            album = Album(song['AlbumID'], song['AlbumName'], artist, cover, self._connection)
-            songs.append(Song(song['SongID'], song['Name'], artist, album, song['TrackNum'],
-                              song['EstimateDuration'], song['Popularity'], self._connection))
-        return songs
+        if album['CoverArtFilename']:
+            cover_url = '%sm%s' % (ALBUM_COVER_URL, album['CoverArtFilename'])
+        else:
+            cover_url = None
+        return Album(album['AlbumID'], album['Name'], album['ArtistID'], album['ArtistName'], cover_url, self._connection)
     
-    def _parse_albums(self, result):
-        '''
-        Parse search json-data and create a list of :class:`Album` objects.
-        '''
-        albums = []
-        for album in result:
-            if album['CoverArtFilename']:
-                cover = Picture('http://beta.grooveshark.com/static/amazonart/m%s' % (album['CoverArtFilename']))
-            else:
-                cover = None
-            artist = Artist(album['ArtistID'], album['ArtistName'], self._connection)
-            albums.append(Album(album['AlbumID'], album['Name'], artist, cover, self._connection))
-        return albums
-    
-    def _parse_playlists(self, result):
+    def _parse_playlist(self, playlist):
         '''
         Parse search json-data and create a list of :class:`Playlist` objects.
         '''
-        playlists = []
-        for playlist in result:
-            user = User(playlist['UserID'], playlist['Username'], None, None, None, None, self._connection, True)
-            playlists.append(Playlist(playlist['PlaylistID'], playlist['Name'], user,
-                                      playlist['Variety'], playlist['NumArtists'], playlist['NumSongs'],
-                                      playlist['About'], playlist['Rank'], playlist['Score'], self._connection))
-        return playlists
-    
-    def _parse_users(self, result):
+        return Playlist(playlist['PlaylistID'], playlist['Name'], playlist['UserID'],  playlist['Username'],
+                        playlist['Variety'], playlist['NumArtists'], playlist['NumSongs'],
+                        playlist['About'], playlist['Rank'], playlist['Score'], self._connection)
+            
+    def _parse_user(self, user):
         '''
-        Parse search json-data and create a list of :class:`User` objects.
+        Parse search json-data and create a :class:`User` object.
         '''
-        users = []
-        for user in result:
-            if user['Picture']:
-                picture = Picture('http://beta.grooveshark.com/static/userimages/%s' % user['Picture'])
-            else:
-                picture = None
-            users.append(User(user['UserID'], user['Username'], picture, user['City'], user['Sex'], user['Country'], self._connection))
-        return users
+        if user['Picture']:
+            picture = 'http://beta.grooveshark.com/static/userimages/%s' % user['Picture']
+        else:
+            picture = None
+        return User(user['UserID'], user['Username'], picture, user['City'], user['Sex'], user['Country'], self._connection)
     
     def search(self, query, type=SEARCH_TYPE_SONGS):
         '''
@@ -803,7 +862,7 @@ class Client(object):
         
         :param query: search string
         :param radio: type to search for
-        :rtype: a list of :class:`Song`, :class:`Artist`, :class:`Album`, :class:`Playlist` or :class:`User` objects
+        :rtype: a generator generates :class:`Song`, :class:`Artist`, :class:`Album`, :class:`Playlist` or :class:`User` objects
         
         Search Types:
                
@@ -821,25 +880,25 @@ class Client(object):
         | :const:`SEARCH_TYPE_USERS`      | Search for users                |
         +---------------------------------+---------------------------------+
         '''
-        result = self._connection.request('getSearchResultsEx', {'query' : query, 'type' : type, 'guts':0, 'ppOverride' : False},
+        result = self._connection.request('getSearchResultsEx', {'query' : query, 'type' : type, 'guts' : 0, 'ppOverride' : False},
                                           self._connection.header('getSearchResultsEx'))[1]['result']
         if type == SEARCH_TYPE_SONGS:
-            return self._parse_songs(result)
+            return (Song.from_request(song, self._connection) for song in result)
         elif type == SEARCH_TYPE_ARTISTS:
-            return [Artist(artist['ArtistID'], artist['Name'], self._connection) for artist in result]
+            return (Artist(artist['ArtistID'], artist['Name'], self._connection) for artist in result)
         elif type == SEARCH_TYPE_ALBUMS:
-            return self._parse_albums(result)
+            return (self._parse_album(album) for album in result)
         elif type == SEARCH_TYPE_PLAYLISTS:
-            return self._parse_playlists(result)
+            return (self._parse_playlist(playlist) for playlist in result)
         elif type == SEARCH_TYPE_USERS:
-            return self._parse_users(result)
+            return (self._parse_user(user) for user in result)
 
     def popular(self, period=POPULAR_TYPE_DAILY):
         '''
         Get popular songs.
         
         :param period: time period 
-        :rtype: a list of :class:`Song` objects
+        :rtype: a generator generates :class:`Song` objects
         
         Time periods:
         
@@ -852,4 +911,4 @@ class Client(object):
         +---------------------------------+-------------------------------------+
         '''
         songs = self._connection.request('popularGetSongs', {'type' : period}, self._connection.header('popularGetSongs'))[1]['Songs']
-        return self._parse_songs(songs)
+        return (Song.from_request(song, self._connection) for song in songs)
