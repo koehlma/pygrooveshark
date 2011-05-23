@@ -192,9 +192,10 @@ class Album(object):
         generator generates album's songs as :class:`Song` objects
         '''
         if self._songs is None:
-            self._songs = self._connection.request('albumGetSongs', {'albumID' : self.id, 'isVerified' : True, 'offset' : 0},
-                                                   self._connection.header('albumGetSongs'))[1]['songs']
-        return (Song.from_response(song, self._connection) for song in self._songs)
+            self._songs = [Song.from_response(song, self._connection) for song in \
+                           self._connection.request('albumGetSongs', {'albumID' : self.id, 'isVerified' : True, 'offset' : 0},
+                                                    self._connection.header('albumGetSongs'))[1]['songs']]
+        return iter(self._songs)
 
 class Artist(object):
     '''
@@ -235,9 +236,10 @@ class Artist(object):
         generator generates similar artists as :class:`Artist` objects
         '''
         if self._similar is None:
-            self._similar = self._connection.request('artistGetSimilarArtists', {'artistID' : self.id},
-                                                     self._connection.header('artistGetSimilarArtists'))[1]['SimilarArtists']
-        return (Artist(artist['ArtistID'], artist['Name'], self._connection) for artist in self._similar)
+            self._similar = [Artist(artist['ArtistID'], artist['Name'], self._connection) for artist in \
+                             self._connection.request('artistGetSimilarArtists', {'artistID' : self.id},
+                                                      self._connection.header('artistGetSimilarArtists'))[1]['SimilarArtists']]
+        return iter(self._similar)
     
     @property
     def songs(self):
@@ -245,9 +247,10 @@ class Artist(object):
         generator generates artist's songs as :class:`Song` objects
         '''
         if self._songs is None:
-            self._songs = self._connection.request('artistGetSongs', {'artistID' : self.id, 'isVerified' : True, 'offset' : 0},
-                                                   self._connection.header('artistGetSongs'))[1]['songs']
-        return (Song.from_response(song, self._connection) for song in self._songs)
+            self._songs = [Song.from_response(song, self._connection) for song in \
+                           self._connection.request('artistGetSongs', {'artistID' : self.id, 'isVerified' : True, 'offset' : 0},
+                                                    self._connection.header('artistGetSongs'))[1]['songs']]
+        return iter(self._songs)
              
 class Song(object):
     '''
@@ -552,9 +555,10 @@ class Playlist(object):
         generator generates playlist's :class:`Song` objects
         '''
         if self._songs is None:
-            self._songs = self._connection.request('playlistGetSongs', {'playlistID' : self.id},
-                                                   self._connection.header('playlistGetSongs'))[1]['Songs']
-        return (Song.from_response(song, self._connection) for song in self._songs)
+            self._songs = [Song.from_response(song, self._connection) for song in \
+                           self._connection.request('playlistGetSongs', {'playlistID' : self.id},
+                                                    self._connection.header('playlistGetSongs'))[1]['Songs']]
+        return iter(self._songs)
 
 class Radio(object):
     '''
