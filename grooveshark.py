@@ -194,7 +194,7 @@ class Album(object):
         if self._songs is None:
             self._songs = self._connection.request('albumGetSongs', {'albumID' : self.id, 'isVerified' : True, 'offset' : 0},
                                                    self._connection.header('albumGetSongs'))[1]['songs']
-        return (Song.from_request(song, self._connection) for song in self._songs)
+        return (Song.from_response(song, self._connection) for song in self._songs)
 
 class Artist(object):
     '''
@@ -247,7 +247,7 @@ class Artist(object):
         if self._songs is None:
             self._songs = self._connection.request('artistGetSongs', {'artistID' : self.id, 'isVerified' : True, 'offset' : 0},
                                                    self._connection.header('artistGetSongs'))[1]['songs']
-        return (Song.from_request(song, self._connection) for song in self._songs)
+        return (Song.from_response(song, self._connection) for song in self._songs)
              
 class Song(object):
     '''
@@ -287,7 +287,7 @@ class Song(object):
         return '%s - %s - %s' % (self.name, self.artist.name, self.album.name)
     
     @classmethod
-    def from_request(cls, song, connection):
+    def from_response(cls, song, connection):
         return cls(song['SongID'], song['Name'], song['ArtistID'], song['ArtistName'], song['AlbumID'], song['AlbumName'],
                    song['CoverArtFilename'], song['TrackNum'], song['EstimateDuration'], song['Popularity'], connection)
     
@@ -554,7 +554,7 @@ class Playlist(object):
         if self._songs is None:
             self._songs = self._connection.request('playlistGetSongs', {'playlistID' : self.id},
                                                    self._connection.header('playlistGetSongs'))[1]['Songs']
-        return (Song.from_request(song, self._connection) for song in self._songs)
+        return (Song.from_response(song, self._connection) for song in self._songs)
 
 class Radio(object):
     '''
@@ -883,7 +883,7 @@ class Client(object):
         result = self._connection.request('getSearchResultsEx', {'query' : query, 'type' : type, 'guts' : 0, 'ppOverride' : False},
                                           self._connection.header('getSearchResultsEx'))[1]['result']
         if type == SEARCH_TYPE_SONGS:
-            return (Song.from_request(song, self._connection) for song in result)
+            return (Song.from_response(song, self._connection) for song in result)
         elif type == SEARCH_TYPE_ARTISTS:
             return (Artist(artist['ArtistID'], artist['Name'], self._connection) for artist in result)
         elif type == SEARCH_TYPE_ALBUMS:
@@ -911,4 +911,4 @@ class Client(object):
         +---------------------------------+-------------------------------------+
         '''
         songs = self._connection.request('popularGetSongs', {'type' : period}, self._connection.header('popularGetSongs'))[1]['Songs']
-        return (Song.from_request(song, self._connection) for song in songs)
+        return (Song.from_response(song, self._connection) for song in songs)
