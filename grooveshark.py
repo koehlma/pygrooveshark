@@ -91,7 +91,7 @@ class Picture(object):
         '''
         raw image data
         '''
-        if not self._data:
+        if self._data is None:
             request = urllib2.Request(self._url, headers=HEADER_USER_AGENT)
             with contextlib.closing(urllib2.urlopen(request)) as response:
                 self._data = response.read()
@@ -191,7 +191,7 @@ class Album(object):
         '''
         generator generates album's songs as :class:`Song` objects
         '''
-        if not self._songs:
+        if self._songs is None:
             self._songs = self._connection.request('albumGetSongs', {'albumID' : self.id, 'isVerified' : True, 'offset' : 0},
                                                    self._connection.header('albumGetSongs'))[1]['songs']
         return (Song.from_request(song, self._connection) for song in self._songs)
@@ -234,7 +234,7 @@ class Artist(object):
         '''
         generator generates similar artists as :class:`Artist` objects
         '''
-        if not self._similar:
+        if self._similar is None:
             self._similar = self._connection.request('artistGetSimilarArtists', {'artistID' : self.id},
                                                      self._connection.header('artistGetSimilarArtists'))[1]['SimilarArtists']
         return (Artist(artist['ArtistID'], artist['Name'], self._connection) for artist in self._similar)
@@ -244,7 +244,7 @@ class Artist(object):
         '''
         generator generates artist's songs as :class:`Song` objects
         '''
-        if not self._songs:
+        if self._songs is None:
             self._songs = self._connection.request('artistGetSongs', {'artistID' : self.id, 'isVerified' : True, 'offset' : 0},
                                                    self._connection.header('artistGetSongs'))[1]['songs']
         return (Song.from_request(song, self._connection) for song in self._songs)
@@ -551,7 +551,7 @@ class Playlist(object):
         '''
         generator generates playlist's :class:`Song` objects
         '''
-        if not self._songs:
+        if self._songs is None:
             self._songs = self._connection.request('playlistGetSongs', {'playlistID' : self.id},
                                                    self._connection.header('playlistGetSongs'))[1]['Songs']
         return (Song.from_request(song, self._connection) for song in self._songs)
