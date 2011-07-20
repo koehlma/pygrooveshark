@@ -25,10 +25,12 @@ import time
 __version__ = '0.0.4'
 __all__ = ['Client']
 
-CLIENTS = {'htmlshark' : '20101222.59',
-           'jsqueue' : '20101222.59'}
+CLIENTS = {'htmlshark' : {'version' : '20110606.04',
+                          'token' : ':backToTheScienceLab:'},
+           'jsqueue' : {'version' : '20110606.04',
+                        'token' : ':bewareOfBearsharktopus:'}}
 
-REFERER = 'http://grooveshark.com/JSQueue.swf?20110405.03'
+REFERER = 'http://grooveshark.com/JSQueue.swf?20110718.01'
 USER_AGENT = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10'
 ALBUM_COVER_URL = 'http://beta.grooveshark.com/static/amazonart/'
 
@@ -66,6 +68,9 @@ RADIO_CLASSICAL = 750
 RADIO_CLASSIC_ROCK = 3529
 
 REFRESH_TOKEN = 240
+
+class RequestError(Exception): pass
+class UnknownError(Exception): pass
 
 class Picture(object):
     '''
@@ -620,7 +625,7 @@ class Connection(object):
         hex_set = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f']
         return ''.join([random.choice(hex_set) for i in range(6)])
     
-    def _request_token(self, method):
+    def _request_token(self, method, client):
         '''
         Calculate request token.
         A new one is required for each request.
@@ -628,7 +633,7 @@ class Connection(object):
         if time.time() - self._token_time > REFRESH_TOKEN:
             self.init_token()
         random_value = self._random_hex()
-        return random_value + hashlib.sha1(method + ':' + self._token + ':quitStealinMahShit:' + random_value).hexdigest()
+        return random_value + hashlib.sha1(method + ':' + self._token + CLIENTS[client]['token'] + random_value).hexdigest()
     
     def _json_request_header(self):
         '''
@@ -657,7 +662,7 @@ class Connection(object):
         self._token = self.request('getCommunicationToken', {'secretKey' : self._secret},
                                    {'uuid' :self._user,
                                     'session' : self._session,
-                                    'clientRevision' : CLIENTS['htmlshark'],
+                                    'clientRevision' : CLIENTS['htmlshark']['version'],
                                     'country' : self.country,
                                     'privacy' : 0,
                                     'client' : 'htmlshark'})[1]
@@ -694,10 +699,10 @@ class Connection(object):
         '''
         Returns a header for Grooveshark's API json-requests
         '''
-        return {'token' : self._request_token(method),
+        return {'token' : self._request_token(method, client),
                 'privacy' : 0,
                 'uuid' : self._user,
-                'clientRevision' : CLIENTS[client],
+                'clientRevision' : CLIENTS[client]['version'],
                 'session' : self._session,
                 'client' : client,
                 'Country' : self.country}
@@ -712,7 +717,13 @@ class Connection(object):
         request = urllib2.Request('https://grooveshark.com/more.php?%s' % (method), data = data,
                                   headers = self._json_request_header())
         with contextlib.closing(urllib2.urlopen(request)) as response:
-            return response.info(), json.loads(response.read())['result']
+            result = json.loads(response.read())
+            if 'result' in result:
+                return response.info(), result['result']
+            elif 'fault' in result:
+                raise RequestError(result['fault']['message'], result['fault']['code'])
+            else:
+                raise UnknownError(result)
 
 class Client(object):
     '''
