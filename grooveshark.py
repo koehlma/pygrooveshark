@@ -29,7 +29,7 @@ CLIENTS = {'htmlshark' : '20101222.59',
            'jsqueue' : '20101222.59'}
 
 REFERER = 'http://grooveshark.com/JSQueue.swf?20110405.03'
-HEADER_USER_AGENT = {'User-Agent' : 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10'}
+USER_AGENT = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10'
 ALBUM_COVER_URL = 'http://beta.grooveshark.com/static/amazonart/'
 
 POPULAR_TYPE_DAILY = 'daily'
@@ -92,7 +92,7 @@ class Picture(object):
         raw image data
         '''
         if self._data is None:
-            request = urllib2.Request(self._url, headers=HEADER_USER_AGENT)
+            request = urllib2.Request(self._url, headers={'User-Agent' : USER_AGENT})
             with contextlib.closing(urllib2.urlopen(request)) as response:
                 self._data = response.read()
         return self._data
@@ -109,7 +109,7 @@ class Stream(object):
         self._ip = ip
         self._key = key
         request = urllib2.Request('http://%s/stream.php' % (self._ip), data='streamKey=%s' % (self._key),
-                                  headers=HEADER_USER_AGENT)
+                                  headers={'User-Agent' : USER_AGENT})
         self._data = urllib2.urlopen(request)
         self._size = int(self.data.info().getheader('Content-Length'))
        
@@ -635,7 +635,7 @@ class Connection(object):
         Return HTTP-headers for json-requests
         '''
         return {'Cookie' : 'PHPSESSID=' + self._session, 'Content-Type' : 'application/json',
-                'User-Agent' : 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10',
+                'User-Agent' : USER_AGENT,
                 'Content-Type' : 'application/json',
                 'Referer' : REFERER}    
     
@@ -643,7 +643,7 @@ class Connection(object):
         '''
         Request session id and country, calculate communication secret
         '''
-        request = urllib2.Request('http://grooveshark.com', headers = {'User-Agent' : 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10'})
+        request = urllib2.Request('http://grooveshark.com', headers={'User-Agent' : USER_AGENT})
         with contextlib.closing(urllib2.urlopen(request)) as response:
             self._session = re.search('PHPSESSID=([a-z0-9]*)', response.info().getheader('Set-Cookie')).group(1)
             self._secret = hashlib.md5(self._session).hexdigest()
