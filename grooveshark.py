@@ -45,11 +45,13 @@ SEARCH_TYPE_USERS = 'Users'
 
 RADIO_RAP = 3
 RADIO_R_AND_B = 4
+RADIO_90_ALT_ROCK = 9
 RADIO_ROCK = 12
 RADIO_ALTERNATIVE = 13
 RADIO_METAL = 17
 RADIO_HIP_HOP = 29
 RADIO_JAZZ = 43
+RADIO_80 = 55
 RADIO_POP = 56
 RADIO_ELECTRONICA = 67
 RADIO_TRANCE = 69
@@ -65,6 +67,7 @@ RADIO_EXPERIMENTAL = 191
 RADIO_BLUES = 230
 RADIO_LATIN = 528
 RADIO_CLASSICAL = 750
+RADIO_DUBSTEP = 2563
 RADIO_CLASSIC_ROCK = 3529
 
 REFRESH_TOKEN = 240
@@ -837,6 +840,12 @@ class Client(object):
         | :const:`RADIO_BLUES`                | Blues                           |
         +-------------------------------------+---------------------------------+
         | :const:`RADIO_CLASSIC_ROCK`         | Oldies                          |
+        +-------------------------------------+---------------------------------+
+        | :const:`RADIO_DUBSTEP`              | Dubstep                         |
+        +-------------------------------------+---------------------------------+
+        | :const:`RADIO_80`                   | 80                              |
+        +-------------------------------------+---------------------------------+
+        | :const:`RADIO_90_ALT_ROCK`          | 90 Alt Rock                     |
         +-------------------------------------+---------------------------------+
         '''
         artists = self._connection.request('getArtistsForTagRadio', {'tagID' : radio},
