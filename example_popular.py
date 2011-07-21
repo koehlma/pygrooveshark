@@ -33,7 +33,7 @@ class Player(object):
     def __init__(self):
         self._client = grooveshark.Client()
         self._client.init()
-        self._popular = [song for song in self._client.popular()]
+        self._popular = list(self._client.popular())
         self._player = gplayer.Player()
         self._player.connect('finished', self._finished)
         self._current = 0
