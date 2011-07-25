@@ -31,7 +31,7 @@ CLIENTS = {'htmlshark' : {'version' : '20110606.04',
                         'token' : ':bewareOfBearsharktopus:'}}
 
 REFERER = 'http://grooveshark.com/JSQueue.swf?20110718.01'
-USER_AGENT = 'Mozilla/5.0 (Windows; U; Windows NT 5.1; de; rv:1.9.0.10) Gecko/2009042316 Firefox/3.0.10'
+USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:5.0) Gecko/20110619 Firefox/5.0'
 ALBUM_COVER_URL = 'http://beta.grooveshark.com/static/amazonart/'
 
 POPULAR_TYPE_DAILY = 'daily'
