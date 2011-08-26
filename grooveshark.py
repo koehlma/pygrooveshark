@@ -25,12 +25,12 @@ import time
 __version__ = '0.0.4'
 __all__ = ['Client']
 
-CLIENTS = {'htmlshark' : {'version' : '20110606.04',
-                          'token' : ':backToTheScienceLab:'},
-           'jsqueue' : {'version' : '20110606.04',
-                        'token' : ':bewareOfBearsharktopus:'}}
+CLIENTS = {'htmlshark' : {'version' : '20110722.11',
+                          'token' : ':neverGonnaGiveYouUp:'},
+           'jsqueue' : {'version' : '20110722.11',
+                        'token' : ':neverGonnaLetYouDown:'}}
 
-REFERER = 'http://grooveshark.com/JSQueue.swf?20110718.01'
+REFERER = 'http://grooveshark.com/JSQueue.swf?20110822.01'
 USER_AGENT = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:5.0) Gecko/20110619 Firefox/5.0'
 ALBUM_COVER_URL = 'http://beta.grooveshark.com/static/amazonart/'
 
