@@ -299,7 +299,7 @@ class Song(object):
     
     @classmethod
     def from_response(cls, song, connection):
-        return cls(song['SongID'], song['Name'], song['ArtistID'], song['ArtistName'], song['AlbumID'], song['AlbumName'],
+        return cls(song['SongID'], song['Name'] if 'Name' in song else song['SongName'], song['ArtistID'], song['ArtistName'], song['AlbumID'], song['AlbumName'],
                    song['CoverArtFilename'], song['TrackNum'], song['EstimateDuration'], song['Popularity'], connection)
     
     @property
