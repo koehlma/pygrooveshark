@@ -252,11 +252,10 @@ class Client(object):
         :rtype: a :class:`Radio` object
         
         Genres:
-        
         +-------------------------------------+---------------------------------+
         | Constant                            | Genre                           |
         +=====================================+=================================+
-        | :const:`RADIO_RNB`                  | R&;B                            |
+        | :const:`RADIO_RNB`                  | R&B                             |
         +-------------------------------------+---------------------------------+
         | :const:`RADIO_JAZZ`                 | Jazz                            |
         +-------------------------------------+---------------------------------+
@@ -331,11 +330,11 @@ class Client(object):
     
     def search(self, query, type=SEARCH_TYPE_SONGS):
         '''
-        Search for songs, artists, albums, playlists, users and events.
+        Search for songs, artists and albums.
         
         :param query: search string
         :param radio: type to search for
-        :rtype: a generator generates :class:`Song`, :class:`Artist`, :class:`Album`, :class:`Playlist` or :class:`User` objects
+        :rtype: a generator generates :class:`Song`, :class:`Artist` and :class:`Album` objects
         
         Search Types:
                
@@ -347,10 +346,6 @@ class Client(object):
         | :const:`SEARCH_TYPE_ARTISTS`    | Search for artists              |
         +---------------------------------+---------------------------------+
         | :const:`SEARCH_TYPE_ALBUMS`     | Search for albums               |
-        +---------------------------------+---------------------------------+
-        | :const:`SEARCH_TYPE_PLAYLISTS`  | Search for playlists            |
-        +---------------------------------+---------------------------------+
-        | :const:`SEARCH_TYPE_USERS`      | Search for users                |
         +---------------------------------+---------------------------------+
         '''
         result = self._connection.request('getResultsFromSearch', {'query' : query, 'type' : type, 'guts' : 0, 'ppOverride' : False},
