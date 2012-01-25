@@ -23,8 +23,6 @@ POPULAR_TYPE_MONTHLY = 'monthly'
 SEARCH_TYPE_SONGS = 'Songs'
 SEARCH_TYPE_ARTISTS = 'Artists'
 SEARCH_TYPE_ALBUMS = 'Albums'
-SEARCH_TYPE_PLAYLISTS = 'Playlists'
-SEARCH_TYPE_USERS = 'Users'
 
 RADIO_KPOP = 1765
 RADIO_CHINESE = 4266
@@ -195,7 +193,7 @@ class Client(object):
     A client for Grooveshark's API which supports:
         
     * radio (songs by genre)
-    * search for songs, artists, albums, playlists and users
+    * search for songs, artists and albums
     * popular songs
     
     :param session: stored session information as returned by :meth:`init_session` method.
@@ -363,12 +361,6 @@ class Client(object):
             return (Artist(artist['ArtistID'], artist['Name'], self._connection) for artist in result)
         elif type == SEARCH_TYPE_ALBUMS:
             return (self._parse_album(album) for album in result)
-        elif type == SEARCH_TYPE_PLAYLISTS:
-            raise NotImplemented()
-            #return (self._parse_playlist(playlist) for playlist in result)
-        elif type == SEARCH_TYPE_USERS:
-            raise NotImplemented()
-            #return (self._parse_user(user) for user in result)
 
     def popular(self, period=POPULAR_TYPE_DAILY):
         '''
