@@ -19,7 +19,7 @@ import contextlib
 import json
 import time
 
-if sys.version[0] == 3:
+if sys.version[0] == '3':
     import urllib.request as urllib
 else:
     import urllib2 as urllib

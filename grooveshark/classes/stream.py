@@ -15,7 +15,7 @@
 
 import sys
 
-if sys.version[0] == 3:
+if sys.version[0] == '3':
     import urllib.request as urllib
     from urllib.parse import quote_plus
 else:
