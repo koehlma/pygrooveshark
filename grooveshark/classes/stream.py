@@ -13,8 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import urllib.request
-import urllib.parse
+import sys
+
+if sys.version[0] == 3:
+    import urllib.request as urllib
+    from urllib.parse import quote_plus
+else:
+    import urllib2 as urllib
+    from urllib import quote_plus
 
 from grooveshark.core.const import *
 
@@ -35,7 +41,7 @@ class Stream(object):
         self._size = None
         
     def _request(self):
-        request = urllib.request.Request('http://%s/stream.php' % (self._ip), data='streamKey=%s' % (self._key),
+        request = urllib.Request('http://%s/stream.php' % (self._ip), data='streamKey=%s' % (self._key),
                                          headers={'User-Agent' : USER_AGENT})
         self._data = self._connection.urlopen(request)
         self._size = int(self.data.info().getheader('Content-Length'))
@@ -45,7 +51,7 @@ class Stream(object):
         '''
         Stream URL.
         '''
-        return 'http://%s/stream.php?streamKey=%s' % (self._ip, urllib.parse.quote_plus(self._key))
+        return 'http://%s/stream.php?streamKey=%s' % (self._ip, quote_plus(self._key))
        
     @property
     def data(self):

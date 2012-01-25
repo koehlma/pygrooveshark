@@ -13,10 +13,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
+
 import contextlib
 import json
 import time
-import urllib.request
+
+if sys.version[0] == 3:
+    import urllib.request as urllib
+else:
+    import urllib2 as urllib
+        
 import uuid
 import random
 import re
@@ -51,7 +58,7 @@ class Connection():
             self._token_time = token[1]
         if queue_id:
             self.queue_id = queue_id
-        self.urlopen = urllib.request.build_opener(urllib.request.ProxyHandler(proxies)).open
+        self.urlopen = urllib.build_opener(urllib.ProxyHandler(proxies)).open
     
     def _random_hex(self):
         '''
@@ -100,7 +107,7 @@ class Connection():
         '''
         Initiate session.
         '''
-        request = urllib.request.Request('http://www.grooveshark.com/', headers={'User-Agent' : USER_AGENT})
+        request = urllib.Request('http://www.grooveshark.com/', headers={'User-Agent' : USER_AGENT})
         response = self.urlopen(request)
         self._session = re.search('PHPSESSID=([a-z0-9]*)', response.info()['Set-Cookie']).group(1)
         self._secret = hashlib.md5(self._session.encode('utf-8')).hexdigest()
@@ -128,7 +135,7 @@ class Connection():
         Grooveshark api request.
         '''
         data = json.dumps({'parameters' : parameters, 'method' : method, 'header' : header})
-        request = urllib.request.Request('https://grooveshark.com/more.php?%s' % (method),
+        request = urllib.Request('https://grooveshark.com/more.php?%s' % (method),
                                          data=data.encode('utf-8'), headers=self._json_request_header())
         with contextlib.closing(self.urlopen(request)) as response:
             result = json.loads(response.read().decode('utf-8'))

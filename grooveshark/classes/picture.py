@@ -13,8 +13,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import sys
+
 import contextlib
-import urllib.request
+
+if sys.version[0] == 3:
+    import urllib.request as urllib
+else:
+    import urllib2 as urllib
 
 from grooveshark.core.const import *
 
@@ -43,7 +49,7 @@ class Picture(object):
         raw image data
         '''
         if self._data is None:
-            request = urllib.request.Request(self._url, headers={'User-Agent' : USER_AGENT})
+            request = urllib.Request(self._url, headers={'User-Agent' : USER_AGENT})
             with contextlib.closing(self._connection.urlopen(request)) as response:
                 self._data = response.read()
         return self._data
