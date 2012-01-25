@@ -200,7 +200,8 @@ class Client(object):
     
     :param session: stored session information as returned by :meth:`init_session` method.
     :param token: stored token information as returned by :meth:`init_token` method.
-    :param proxy: dictionary mapping protocol to proxy.   
+    :param queue_id: stored queue id as returned by :meth:`init_queue` method.
+    :param proxies: dictionary mapping protocol to proxy.
     '''
     def __init__(self, *args, **kwargs):
         self._connection = Connection(*args, **kwargs)
@@ -257,45 +258,45 @@ class Client(object):
         +-------------------------------------+---------------------------------+
         | Constant                            | Genre                           |
         +=====================================+=================================+
-        | :const:`RADIO_`RNB                  | R&;B                            |
+        | :const:`RADIO_RNB`                  | R&;B                            |
         +-------------------------------------+---------------------------------+
-        | :const:`RADIO_`JAZZ                 | Jazz                            |
+        | :const:`RADIO_JAZZ`                 | Jazz                            |
         +-------------------------------------+---------------------------------+
-        | :const:`RADIO_`ROCK                 | Rock                            |
+        | :const:`RADIO_ROCK`                 | Rock                            |
         +-------------------------------------+---------------------------------+
-        | :const:`RADIO_`CLASSICAL            | Classical                       |
+        | :const:`RADIO_CLASSICAL`            | Classical                       |
         +-------------------------------------+---------------------------------+
-        | :const:`RADIO_`DUBSTEP              | Dubstep                         |
+        | :const:`RADIO_DUBSTEP`              | Dubstep                         |
         +-------------------------------------+---------------------------------+
-        | :const:`RADIO_`BLUES                | Blues                           |
+        | :const:`RADIO_BLUES`                | Blues                           |
         +-------------------------------------+---------------------------------+
-        | :const:`RADIO_`FOLK                 | Folk                            |
+        | :const:`RADIO_FOLK`                 | Folk                            |
         +-------------------------------------+---------------------------------+
-        | :const:`RADIO_`ELECTRONICA          | Electronica                     |
+        | :const:`RADIO_ELECTRONICA`          | Electronica                     |
         +-------------------------------------+---------------------------------+
-        | :const:`RADIO_`CHRISTMAS            | Christmas                       |
+        | :const:`RADIO_CHRISTMAS`            | Christmas                       |
         +-------------------------------------+---------------------------------+
-        | :const:`RADIO_`OLDIES               | Oldies                          |
+        | :const:`RADIO_OLDIES`               | Oldies                          |
         +-------------------------------------+---------------------------------+
-        | :const:`RADIO_`COUNTRY              | Country                         |
+        | :const:`RADIO_COUNTRY`              | Country                         |
         +-------------------------------------+---------------------------------+
-        | :const:`RADIO_`EXPERIMENTAL         | Experimental                    |
+        | :const:`RADIO_EXPERIMENTAL`         | Experimental                    |
         +-------------------------------------+---------------------------------+
-        | :const:`RADIO_`POP                  | Pop                             |
+        | :const:`RADIO_POP`                  | Pop                             |
         +-------------------------------------+---------------------------------+
-        | :const:`RADIO_`INDIE                | Indie                           |
+        | :const:`RADIO_INDIE`                | Indie                           |
         +-------------------------------------+---------------------------------+
-        | :const:`RADIO_`BLUEGRASS            | Bluegrass                       |
+        | :const:`RADIO_BLUEGRASS`            | Bluegrass                       |
         +-------------------------------------+---------------------------------+
-        | :const:`RADIO_`RAP                  | Rap                             |
+        | :const:`RADIO_RAP`                  | Rap                             |
         +-------------------------------------+---------------------------------+
-        | :const:`RADIO_`AMBIENT              | Ambient                         |
+        | :const:`RADIO_AMBIENT`              | Ambient                         |
         +-------------------------------------+---------------------------------+
-        | :const:`RADIO_`TRANCE               | Trance                          |
+        | :const:`RADIO_TRANCE`               | Trance                          |
         +-------------------------------------+---------------------------------+
-        | :const:`RADIO_`REGGAE               | Reggae                          |
+        | :const:`RADIO_REGGAE`               | Reggae                          |
         +-------------------------------------+---------------------------------+
-        | :const:`RADIO_`METAL                | Metal                           |
+        | :const:`RADIO_METAL`                | Metal                           |
         +-------------------------------------+---------------------------------+
         '''
         artists = self._connection.request('getArtistsForTagRadio', {'tagID' : radio},

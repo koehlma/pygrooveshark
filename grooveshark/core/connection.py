@@ -45,7 +45,9 @@ class Connection():
     Lowlevel api communication.
     
     :param session: stored session information as returned by :meth:`init_session` method.
-    :param token: stored token information as returned by :meth:`init_token` method.   
+    :param token: stored token information as returned by :meth:`init_token` method.
+    :param queue_id: stored queue id as returned by :meth:`init_queue` method.
+    :param proxies: dictionary mapping protocol to proxy.
     '''
     def __init__(self, session=None, token=None, queue_id=None, proxies=None):
         if session:
