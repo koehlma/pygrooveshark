@@ -31,8 +31,9 @@ class Picture(object):
         
     :param url: image url
     '''
-    def __init__(self, url):
+    def __init__(self, url, connection):
         self._url = url
+        self._connection = connection
         self._data = None
         self._type = self._url.split('.').pop()
     

@@ -69,7 +69,7 @@ class Album(object):
         '''
         if self._cover_url:
             if not self._cover:
-                self._cover = Picture(self._cover_url)
+                self._cover = Picture(self._cover_url, self._connection)
             return self._cover
     
     @property
