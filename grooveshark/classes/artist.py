@@ -31,6 +31,10 @@ class Artist(object):
         
     def __str__(self):
         return self.name
+    
+    @classmethod
+    def from_export(cls, export, connection):
+        return cls(export['id'], export['name'], connection)
 
     @property
     def id(self):
@@ -67,5 +71,13 @@ class Artist(object):
                            self._connection.request('artistGetAllSongs', {'artistID' : self.id, 'isVerified' : True, 'offset' : 0},
                                                     self._connection.header('artistGetSongs'))[1]['songs']]
         return iter(self._songs)
+    
+    def export(self):
+        '''
+        Returns a dictionary with all song information.
+        Use the :meth:`from_export` method to recreate the
+        :class:`Song` object.
+        '''
+        return {'id' : self.id, 'name' : self.name}
     
 from grooveshark.classes.song import Song

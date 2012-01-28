@@ -39,6 +39,10 @@ class Album(object):
     def __str__(self):
         return '%s - %s' % (self.name, self.artist.name)
     
+    @classmethod
+    def from_export(cls, export, connection):
+        return cls(export['id'], export['name'], export['artist_id'], export['artist'], export['cover'], connection)
+    
     @property
     def id(self):
         '''
@@ -82,6 +86,14 @@ class Album(object):
                            self._connection.request('albumGetSongs', {'albumID' : self.id, 'isVerified' : False, 'offset' : 0},
                                                     self._connection.header('albumGetSongs'))[1]['songs']]
         return iter(self._songs)
+    
+    def export(self):
+        '''
+        Returns a dictionary with all song information.
+        Use the :meth:`from_export` method to recreate the
+        :class:`Song` object.
+        '''
+        return {'id' : self.id, 'name' : self.name, 'artist' : self._artist_name, 'artist_id' : self._artist_id, 'cover' : self._cover_url}
     
 from grooveshark.classes.song import Song
 from grooveshark.classes.artist import Artist

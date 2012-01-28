@@ -22,12 +22,16 @@ class Radio(object):
     :param radio: the genre (see :class:`Client`'s :meth:`radio` method)
     :param connection: the underlying :class:`Connection` object
     '''
-    def __init__(self, artists, radio, connection):
+    def __init__(self, artists, radio, connection, recent_artists=[], songs_already_seen=[]):
         self._artists = [artist['ArtistID'] for artist in artists]
         self._radio = radio
         self._connection = connection
-        self._recent_artists = []
-        self._songs_already_seen = []
+        self._recent_artists = list(recent_artists)
+        self._songs_already_seen = list(songs_already_seen)
+    
+    @classmethod
+    def from_export(cls, export, connection):
+        return cls(export['artists'], export['radio'], connection, export['recent_artists'], export['songs_already_seen'])
     
     @property
     def song(self):
@@ -44,5 +48,13 @@ class Radio(object):
                                         self._connection.header('autoplayGetSong', 'jsqueue'))[1]
         return Song(song['SongID'], song['SongName'], song['ArtistID'], song['ArtistName'], song['AlbumID'], song['AlbumName'],
                     song['CoverArtUrl'], None, song['EstimateDuration'], None, self._connection)
-
+    
+    def export(self):
+        '''
+        Returns a dictionary with all song information.
+        Use the :meth:`from_export` method to recreate the
+        :class:`Song` object.
+        '''
+        return {'artists' : self._artists, 'radio' : self._radio, 'recent_artists' : self._recent_artists, 'songs_already_seen' : self._songs_already_seen}
+    
 from grooveshark.classes.song import Song

@@ -202,7 +202,7 @@ class Client(object):
     :param proxies: dictionary mapping protocol to proxy.
     '''
     def __init__(self, *args, **kwargs):
-        self._connection = Connection(*args, **kwargs)
+        self.connection = Connection(*args, **kwargs)
 
     def init(self):
         '''
@@ -210,8 +210,8 @@ class Client(object):
         
         :rtype: tuple: (:meth:`init_session()`, :meth:`init_token()`, :meth:`init_queue()`)        
         '''
-        return (self._connection.init_session(), self._connection.init_token(), self._connection.init_queue())
-    
+        return (self.connection.init_session(), self.connection.init_token(), self.connection.init_queue())
+
     def init_session(self):
         '''
         Fetch Grooveshark's session.
@@ -220,7 +220,7 @@ class Client(object):
         
         You can store the returned tuple and use it again over the *session* argument of the :class:`Client` class. 
         '''
-        return self._connection.init_session()
+        return self.connection.init_session()
     
     def init_token(self):
         '''
@@ -231,7 +231,7 @@ class Client(object):
         
         You can store the returned tuple and use it again over the *token* argument of the :class:`Client` class. 
         '''
-        return self._connection.init_token()
+        return self.connection.init_token()
     
     def init_queue(self):
         '''
@@ -242,7 +242,7 @@ class Client(object):
         
         You can store the returned queue_id and use it again over the *queue_id* argument of the :class:`Client` class. 
         '''
-        return self._connection.init_queue()
+        return self.connection.init_queue()
     
     def radio(self, radio):
         '''
@@ -297,9 +297,9 @@ class Client(object):
         | :const:`RADIO_METAL`                | Metal                           |
         +-------------------------------------+---------------------------------+
         '''
-        artists = self._connection.request('getArtistsForTagRadio', {'tagID' : radio},
-                                           self._connection.header('getArtistsForTagRadio', 'jsqueue'))[1]
-        return Radio(artists, radio, self._connection)
+        artists = self.connection.request('getArtistsForTagRadio', {'tagID' : radio},
+                                          self.connection.header('getArtistsForTagRadio', 'jsqueue'))[1]
+        return Radio(artists, radio, self.connection)
     
     def _parse_album(self, album):
         '''
@@ -309,26 +309,8 @@ class Client(object):
             cover_url = '%sm%s' % (ALBUM_COVER_URL, album['CoverArtFilename'])
         else:
             cover_url = None
-        return Album(album['AlbumID'], album['Name'], album['ArtistID'], album['ArtistName'], cover_url, self._connection)
-    
-    def _parse_playlist(self, playlist):
-        '''
-        Parse search json-data and create a list of :class:`Playlist` objects.
-        '''
-        #return Playlist(playlist['PlaylistID'], playlist['Name'], playlist['UserID'],  playlist['Username'],
-        #                playlist['Variety'], playlist['NumArtists'], playlist['NumSongs'],
-        #                playlist['About'], playlist['Rank'], playlist['Score'], self._connection)
-            
-    def _parse_user(self, user):
-        '''
-        Parse search json-data and create a :class:`User` object.
-        '''
-        #if user['Picture']:
-        #    picture = 'http://beta.grooveshark.com/static/userimages/%s' % user['Picture']
-        #else:
-        #    picture = None
-        #return User(user['UserID'], user['Username'], picture, user['City'], user['Sex'], user['Country'], self._connection)
-    
+        return Album(album['AlbumID'], album['Name'], album['ArtistID'], album['ArtistName'], cover_url, self.connection)
+       
     def search(self, query, type=SEARCH_TYPE_SONGS):
         '''
         Search for songs, artists and albums.
@@ -349,12 +331,12 @@ class Client(object):
         | :const:`SEARCH_TYPE_ALBUMS`     | Search for albums               |
         +---------------------------------+---------------------------------+
         '''
-        result = self._connection.request('getResultsFromSearch', {'query' : query, 'type' : type, 'guts' : 0, 'ppOverride' : False},
-                                          self._connection.header('getResultsFromSearch'))[1]['result']
+        result = self.connection.request('getResultsFromSearch', {'query' : query, 'type' : type, 'guts' : 0, 'ppOverride' : False},
+                                         self.connection.header('getResultsFromSearch'))[1]['result']
         if type == SEARCH_TYPE_SONGS:
-            return (Song.from_response(song, self._connection) for song in result)
+            return (Song.from_response(song, self.connection) for song in result)
         elif type == SEARCH_TYPE_ARTISTS:
-            return (Artist(artist['ArtistID'], artist['Name'], self._connection) for artist in result)
+            return (Artist(artist['ArtistID'], artist['Name'], self.connection) for artist in result)
         elif type == SEARCH_TYPE_ALBUMS:
             return (self._parse_album(album) for album in result)
 
@@ -375,5 +357,5 @@ class Client(object):
         | :const:`POPULAR_TYPE_MONTHLY`   | Popular songs of this month         |
         +---------------------------------+-------------------------------------+
         '''
-        songs = self._connection.request('popularGetSongs', {'type' : period}, self._connection.header('popularGetSongs'))[1]['Songs']
-        return (Song.from_response(song, self._connection) for song in songs)
+        songs = self.connection.request('popularGetSongs', {'type' : period}, self.connection.header('popularGetSongs'))[1]['Songs']
+        return (Song.from_response(song, self.connection) for song in songs)

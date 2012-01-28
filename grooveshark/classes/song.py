@@ -38,8 +38,6 @@ class Song(object):
         self._artist_name = artist_name
         self._album_id = album_id
         self._album_name = album_name
-        self._album_id = album_id
-        self._album_name = album_name
         self._cover_url = cover_url
         self._track = track
         self._duration = duration
@@ -54,6 +52,11 @@ class Song(object):
     def from_response(cls, song, connection):
         return cls(song['SongID'], song['Name'] if 'Name' in song else song['SongName'], song['ArtistID'], song['ArtistName'], song['AlbumID'], song['AlbumName'],
                    song['CoverArtFilename'], song['TrackNum'], song['EstimateDuration'], song['Popularity'], connection)
+    
+    @classmethod
+    def from_export(cls, export, connection):
+        return cls(export['id'], export['name'], export['artist_id'], export['artist'], export['album_id'], export['album'], export['cover'],
+                   export['track'], export['duration'], export['popularity'], connection)
     
     @property
     def id(self):
@@ -104,7 +107,7 @@ class Song(object):
     @property
     def popularity(self):
         '''
-        populaity
+        popularity
         '''
         return self._popularity
     
@@ -117,6 +120,16 @@ class Song(object):
                                                                             'prefetch' : False, 'mobile' : False},
                                                self._connection.header('getStreamKeyFromSongIDEx', 'jsqueue'))[1]
         return Stream(stream_info['ip'], stream_info['streamKey'], self._connection)
+    
+    def export(self):
+        '''
+        Returns a dictionary with all song information.
+        Use the :meth:`from_export` method to recreate the
+        :class:`Song` object.
+        '''
+        return {'id' : self.id, 'name' : self.name, 'artist' : self._artist_name, 'artist_id' : self._artist_id,
+                'album' : self._album_name, 'album_id' : self._album_id, 'track' : self.track,
+                'duration' : self.duration, 'popularity' : self.popularity, 'cover' : self._cover_url}
         
 from grooveshark.classes.artist import Artist
 from grooveshark.classes.album import Album
