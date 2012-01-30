@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from  grooveshark.core.const import *
+
 class Song(object):
     '''
     Represents a song.
@@ -39,6 +41,8 @@ class Song(object):
         self._album_id = album_id
         self._album_name = album_name
         self._cover_url = cover_url
+        if not self._cover_url:
+            self._cover_url = NO_COVER_URL
         self._track = track
         self._duration = duration
         self._popularity = popularity
@@ -51,7 +55,7 @@ class Song(object):
     @classmethod
     def from_response(cls, song, connection):
         return cls(song['SongID'], song['Name'] if 'Name' in song else song['SongName'], song['ArtistID'], song['ArtistName'], song['AlbumID'], song['AlbumName'],
-                   song['CoverArtFilename'], song['TrackNum'], song['EstimateDuration'], song['Popularity'], connection)
+                   ALBUM_COVER_URL + song['CoverArtFilename'] if song['CoverArtFilename'] else None, song['TrackNum'], song['EstimateDuration'], song['Popularity'], connection)
     
     @classmethod
     def from_export(cls, export, connection):
