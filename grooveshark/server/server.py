@@ -28,6 +28,7 @@ else:
     from urlparse import urlparse, parse_qs
     
 import grooveshark.core.client
+from grooveshark.classes import *
 
 class Server(httpserver.BaseHTTPRequestHandler):
     def _respond_json(self, data):
@@ -48,6 +49,8 @@ class Server(httpserver.BaseHTTPRequestHandler):
     
     def _www(self):
         document = os.path.join(self.server.www, self.url.path[1:])
+        if os.path.isdir(document):
+            document += '/index.html'
         if os.path.isfile(document):
             self.send_response(200)
             self.send_header('Content-Type', mimetypes.guess_type(document))
@@ -92,6 +95,28 @@ class Server(httpserver.BaseHTTPRequestHandler):
         else:
             self._bad_request('missing tag argument')        
     
+    def _command_stream(self, query):
+        song = Song.from_export(json.loads(query['song'][0]), self.server.client.connection)
+        stream = song.stream
+        print(stream.url)
+        self.send_response(200)
+        #self.send_header('Accept-Ranges', 'bytes')
+        #self.send_header('Cache-Control', 'max-age=86400')
+        #self.send_header('Connection', 'Keep-Alive')
+        #self.send_header('Content-Range', 'bytes 0-%i/%i' % (stream.size, stream.size))
+        self.send_header('Content-Type', stream.data.info()['Content-Type'])
+        self.send_header('Content-Length', stream.data.info()['Content-Length'])
+        #self.send_header('Vary', 'Accept-Encoding')
+        self.end_headers()
+        data = stream.data.read(2048)
+        while data:
+            self.wfile.write(data)
+            data = stream.data.read(2048)
+            
+    def _command_streamurl(self, query):
+        song = Song.from_export(json.loads(query['song'][0]), self.server.client.connection)
+        self._respond_json({'status' : 'success', 'result' : song.stream.url})
+    
     def _request(self):
         query = parse_qs(self.url.query)
         if 'command' in query:
@@ -105,8 +130,6 @@ class Server(httpserver.BaseHTTPRequestHandler):
     
     def _handle(self):
         self.url = urlparse(self.path)
-        if self.url.path == '/':
-            self.url = urlparse(self.path + 'index.html')
         if self.url.path == '/request':
             self._request()
         else:
@@ -122,7 +145,7 @@ def main(address=('0.0.0.0', 8181)):
     Starts own grooveshark service.
     '''   
     client = grooveshark.core.client.Client()
-    client.init()
+    print(client.init())
     server = ThreadingHTTPServer(address, Server)
     server.www = os.path.join(os.path.dirname(__file__), 'www')
     server.client = client

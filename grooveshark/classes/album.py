@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from  grooveshark.core.const import *
+
 class Album(object):
     '''
     Represents an album.
@@ -32,6 +34,8 @@ class Album(object):
         self._artist_id = artist_id
         self._artist_name = artist_name
         self._cover_url = cover_url
+        if not self._cover_url:
+            self._cover_url = NO_COVER_URL
         self._songs = None
         self._cover = None
         self._artist = None
@@ -71,10 +75,9 @@ class Album(object):
         '''
         album cover as :class:`Picture` object
         '''
-        if self._cover_url:
-            if not self._cover:
-                self._cover = Picture(self._cover_url, self._connection)
-            return self._cover
+        if not self._cover:
+            self._cover = Picture(self._cover_url, self._connection)
+        return self._cover
     
     @property
     def songs(self):

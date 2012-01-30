@@ -17,10 +17,10 @@ import sys
 
 if sys.version[0] == '3':
     import urllib.request as urllib
-    from urllib.parse import quote_plus
+    from urllib.parse import quote_plus, urlencode
 else:
     import urllib2 as urllib
-    from urllib import quote_plus
+    from urllib import quote_plus, urlencode
 
 from grooveshark.core.const import *
 
@@ -41,10 +41,10 @@ class Stream(object):
         self._size = None
         
     def _request(self):
-        request = urllib.Request('http://%s/stream.php' % (self._ip), data='streamKey=%s' % (self._key),
+        request = urllib.Request('http://%s/stream.php' % (self._ip), data=urlencode({'streamKey' : self._key}).encode('utf-8'),
                                          headers={'User-Agent' : USER_AGENT})
         self._data = self._connection.urlopen(request)
-        self._size = int(self.data.info().getheader('Content-Length'))
+        self._size = int(self.data.info()['Content-Length'])
     
     @property
     def url(self):

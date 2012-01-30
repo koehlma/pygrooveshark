@@ -21,6 +21,8 @@ TOKEN_TIMEOUT = 120
 USER_AGENT = 'Mozilla/5.0 (Windows NT 6.2; rv:9.0.1) Gecko/20100101 Firefox/9.0.1'
 # url where album covers are located
 ALBUM_COVER_URL = 'http://images.grooveshark.com/static/albums/'
+# no cover url
+NO_COVER_URL = 'http://images.grooveshark.com/static/albums/70_album.png'
 # the grooveshark clients
 CLIENTS = {'htmlshark' : {'version' : '20120123',
                           'token' : 'sloppyJoes'},
