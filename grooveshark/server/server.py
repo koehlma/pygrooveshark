@@ -17,6 +17,8 @@ import sys
 import os.path
 import json
 import mimetypes
+import threading
+import time
 if sys.version[0] == '3':
     import http.server as httpserver
     import socketserver
@@ -30,6 +32,92 @@ else:
 import grooveshark.core.client
 from grooveshark.classes import *
 
+STATE_READING = 0
+STATE_FINISHED = 1
+STATE_CANCELED = 2
+
+class Cache(object):
+    '''
+    Reads out the whole file object to avoid for example stream timeouts.
+    Use :class:`Player`'s :meth:`play_cache` method to play this object.
+    
+    Attention: This starts a new thread for reading.
+    If you want to cancel this thread you have to call the :meth:`cancel` method.
+    If you call :class:`Player`'s :meth:`stop` method the :meth:`cancel` method is automatically called.
+    
+    :param fileobj: file object to cache
+    :param size: size to calculate state of caching (and playing)
+    :param seekable: file object is seekable (not implemented yet)
+    :param blocksize: size of blocks for reading and caching
+    '''
+    def __init__(self, fileobj, size, blocksize=2048):
+        self._fileobj = fileobj
+        self.size = size
+        self._blocksize = blocksize
+        self.state = STATE_READING
+        self._memory = []
+        self._current = 0
+        self._active = True
+        self.bytes_read = 0
+        self._read_thread = threading.Thread(target=self._read)
+        self._read_thread.start()
+        
+    def _read(self):
+        data = self._fileobj.read(self._blocksize)
+        while data and self._active:
+            self._memory.append(data)
+            self.bytes_read += len(data)
+            data = self._fileobj.read(self._blocksize)
+        if self._active:
+            self.state = STATE_FINISHED
+        self._fileobj.close()
+    
+    def reset(self):
+        self._current = 0
+        
+    @property
+    def offset(self):
+        return self._current
+    
+    @offset.setter
+    def offset(self, offset):
+        self._current = offset
+    
+    def cancel(self):
+        '''
+        Cancels the reading thread.
+        '''
+        if self.state == STATE_READING:
+            self._active = False
+            self.state = STATE_CANCELED
+        
+    def read(self, size=None):
+        '''
+        Reads in the internal cache.
+        This method should not be used directly.
+        The :class:`Player` class uses this method to read data for playing.
+        '''
+        start_block, start_bytes = divmod(self._current, self._blocksize)
+        if size:
+            if size > self.size - self._current:
+                size = self.size - self._current
+            while self._current + size > self.bytes_read:
+                time.sleep(0.01)
+            self._current += size
+            end_block, end_bytes = divmod(self._current, self._blocksize)
+            result = self._memory[start_block:end_block]
+        else:
+            while self.size > self.bytes_read:
+                time.sleep(0.01)
+            self._current = self.size
+            result = self._memory[start_block:]
+        if size:
+            if end_bytes > 0 :
+                result.append(self._memory[end_block][:end_bytes])
+        if start_bytes > 0 and result:
+            result[0] = result[0][start_bytes:]
+        return b''.join(result)              
+        
 class Server(httpserver.BaseHTTPRequestHandler):
     def _respond_json(self, data):
         data = json.dumps(data).encode('utf-8')
@@ -97,26 +185,55 @@ class Server(httpserver.BaseHTTPRequestHandler):
     
     def _command_stream(self, query):
         song = Song.from_export(json.loads(query['song'][0]), self.server.client.connection)
-        stream = song.stream
-        print(stream.url)
-        self.send_response(200)
-        #self.send_header('Accept-Ranges', 'bytes')
-        #self.send_header('Cache-Control', 'max-age=86400')
-        #self.send_header('Connection', 'Keep-Alive')
-        #self.send_header('Content-Range', 'bytes 0-%i/%i' % (stream.size, stream.size))
-        self.send_header('Content-Type', stream.data.info()['Content-Type'])
-        self.send_header('Content-Length', stream.data.info()['Content-Length'])
-        #self.send_header('Vary', 'Accept-Encoding')
-        self.end_headers()
-        data = stream.data.read(2048)
-        while data:
-            self.wfile.write(data)
-            data = stream.data.read(2048)
+        if song.id in self.server.streams:
+            stream, cache = self.server.streams[song.id]
+        else:
+            self.log_message('GS Stream Request')
+            stream = song.stream
+            cache = Cache(stream.data, stream.size)
+            self.server.streams[song.id] = stream, cache
+        if 'Range' in self.headers:
+            self.send_response(206)
+            start_byte, end_byte = self.headers['Range'].replace('bytes=', '').split('-')
+            if start_byte:
+                start_byte = int(start_byte)
+            else:
+                start_byte = 0
+            if end_byte:
+                end_byte = int(end_byte)
+            else:
+                end_byte = stream.size
+            cache.offset = start_byte
+            self.send_response(206)
+            if 'download' in query:
+                self.send_header('Content-Disposition', 'attachment; filename="%s - %s - %s.mp3"' % (song.name, song.album.name, song.artist.name))
+            self.send_header('Accept-Ranges', 'bytes')
+            self.send_header('Content-Type', stream.data.info()['Content-Type'])
+            self.send_header('Content-Length', stream.data.info()['Content-Length'])
+            self.send_header('Content-Range', 'bytes %i-%i/%i' % (start_byte, end_byte, stream.size))
+            self.end_headers()
+            sended_bytes = 0
+            while sended_bytes < end_byte:
+                if end_byte - sended_bytes < 2048:
+                    data = cache.read(end_byte - sended_bytes)
+                else:
+                    data = cache.read(2048)
+                sended_bytes += len(data)
+                self.wfile.write(data)                  
+        else:
+            cache.reset()
+            self.send_response(200)
+            if 'download' in query:
+                self.send_header('Content-Disposition', 'attachment; filename="%s - %s - %s.mp3"' % (song.name, song.album.name, song.artist.name))
+            self.send_header('Accept-Ranges', 'bytes')
+            self.send_header('Content-Type', stream.data.info()['Content-Type'])
+            self.send_header('Content-Length', stream.data.info()['Content-Length'])
+            self.end_headers()
+            data = cache.read(2048)
+            while data:
+                self.wfile.write(data)
+                data = cache.read(2048)
             
-    def _command_streamurl(self, query):
-        song = Song.from_export(json.loads(query['song'][0]), self.server.client.connection)
-        self._respond_json({'status' : 'success', 'result' : song.stream.url})
-    
     def _request(self):
         query = parse_qs(self.url.query)
         if 'command' in query:
@@ -148,6 +265,7 @@ def main(address=('0.0.0.0', 8181)):
     print(client.init())
     server = ThreadingHTTPServer(address, Server)
     server.www = os.path.join(os.path.dirname(__file__), 'www')
+    server.streams = {}
     server.client = client
     server.serve_forever()
 
