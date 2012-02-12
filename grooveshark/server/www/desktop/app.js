@@ -3,28 +3,28 @@ Ext.regModel('Song', {
 });
 
 Ext.define('Ext.grooveshark.AudioPlayer', {
-    extend          : 'Ext.toolbar.Toolbar',
-    alias           : 'widget.audioplayer',
-    player          : {
-        tag      : 'audio',
-        src      : '',
-        style    : 'display: none',
-        preload  : 'none',
+    extend : 'Ext.toolbar.Toolbar',
+    alias : 'widget.audioplayer',
+    player : {
+        tag : 'audio',
+        src : '',
+        style : 'display: none',
+        preload : 'none',
         controls : 'hidden'
     },
-    slide_lock      : false,
-    initComponent   : function() {
+    slide_lock : false,
+    initComponent : function() {
         this.play_button = Ext.create('Ext.Button', {
-            icon    : 'icons/player/play.png',
+            icon : '/icons/player/play.png',
             tooltip : 'Play'
         });
         this.play_button.addListener('click', this.toggle);
         this.play_button.base = this;
         this.slider = Ext.create('Ext.slider.Single', {
-            flex        : 1,
-            value       : 0,
-            minValue    : 0,
-            maxValue    : 100 * 1000,
+            flex : 1,
+            value : 0,
+            minValue : 0,
+            maxValue : 100 * 1000,
         });
         this.slider.addListener('change', this.slide);
         this.slider.base = this;
@@ -34,7 +34,7 @@ Ext.define('Ext.grooveshark.AudioPlayer', {
         this.items = [this.play_button, this.slider, this.time];
         this.callParent(arguments);
     },
-    onRender        : function() {
+    onRender : function() {
         this.player = Ext.DomHelper.append(document.body, this.player, true);
         this.player.addListener('timeupdate', this.timeupdate);
         this.player.addListener('play', this.on_play);
@@ -42,14 +42,14 @@ Ext.define('Ext.grooveshark.AudioPlayer', {
         this.player.base = this;
         this.callParent(arguments);
     },
-    zeros           : function (number, length) {
+    zeros : function (number, length) {
         str = '' + number;
         while (str.length < length) {
             str = '0' + str;
         }
         return str;
     },
-    timeupdate      : function(event, element) {
+    timeupdate : function(event, element) {
         percentage = (this.dom.currentTime / this.dom.duration) * 100;
         played_minutes = Math.floor(this.dom.currentTime / 60);
         played_seconds = Math.floor(this.dom.currentTime - played_minutes * 60);
@@ -62,14 +62,14 @@ Ext.define('Ext.grooveshark.AudioPlayer', {
         }
         this.base.time.setText(this.base.zeros(played_minutes, 2) + ':' + this.base.zeros(played_seconds, 2) + ' / ' + this.base.zeros(total_minutes, 2) + ':' + this.base.zeros(total_seconds, 2));
     },
-    toggle          : function() {
+    toggle : function() {
         if (this.base.player.dom.paused) {
             this.base.player.dom.play();
         } else {
             this.base.player.dom.pause();
         }
     },
-    slide           : function(slider, value, thumb, options) {
+    slide : function(slider, value, thumb, options) {
         if (this.base.slide_lock == false) {
             this.base.slide_lock = true;
             seconds = this.base.player.dom.duration * (value / 1000) / 100;
@@ -77,17 +77,17 @@ Ext.define('Ext.grooveshark.AudioPlayer', {
             this.base.slide_lock = false;
         }
     },
-    play            : function(url) {
+    play : function(url) {
         this.player.dom.src = url;
         this.player.dom.load();
         this.player.dom.play();
     },
-    on_play         : function(event, element) {
-        this.base.play_button.setIcon('icons/player/pause.png');
+    on_play : function(event, element) {
+        this.base.play_button.setIcon('/icons/player/pause.png');
     },
-    on_pause        : function(event, element) {
-        this.base.play_button.setIcon('icons/player/play.png');
-    },
+    on_pause : function(event, element) {
+        this.base.play_button.setIcon('/icons/player/play.png');
+    }
 });
 
 Ext.define('Ext.grooveshark.SongGrid', {
@@ -99,18 +99,18 @@ Ext.define('Ext.grooveshark.SongGrid', {
             sortable    : false,
             items       : [
                 {
-                    icon: 'icons/player/play.png',
+                    icon: '/icons/player/play.png',
                     tooltip: 'Play',
                     handler: function(grid, rowIndex, colIndex) {
                         record = grid.getStore().getAt(rowIndex);
-                        audioplayer.play('request?command=stream&song=' + escape(Ext.JSON.encode(record.data)));
+                        audioplayer.play('/request/stream?song=' + escape(Ext.JSON.encode(record.data)));
                     }
                 }, {
-                    icon: 'icons/download.png',
+                    icon: '/icons/download.png',
                     tooltip: 'Download',
                     handler: function(grid, rowIndex, colIndex) {
                         record = grid.getStore().getAt(rowIndex);
-                        window.open('request?command=stream&download=true&song=' + escape(Ext.JSON.encode(record.data), '_blank'));
+                        window.open('/request/stream?download=true&song=' + escape(Ext.JSON.encode(record.data), '_blank'));
                     }
             }]
         }, {
@@ -135,16 +135,15 @@ Ext.define('Ext.grooveshark.SongGrid', {
 
 Ext.application({
     name: 'FreeGroove',
+    appFolder: 'app',
+    
     launch: function() {
         audioplayer = Ext.create('Ext.grooveshark.AudioPlayer', {region: 'south'});
         popular_store = Ext.create('Ext.data.Store', {
             model: 'Song',
             proxy: {
                 type        : 'ajax',
-                url         : '/request',
-                extraParams : {
-                    command : 'popular'
-                },
+                url         : '/request/popular',
                 reader: {
                     type    : 'json',
                     root    : 'result'
@@ -156,10 +155,9 @@ Ext.application({
             model: 'Song',
             proxy: {
                 type        : 'ajax',
-                url         : '/request',
+                url         : '/request/search',
                 extraParams : {
-                    command : 'search',
-                    type    : 'Songs',
+                    type    : 'Songs'
                 },
                 reader: {
                     type    : 'json',
