@@ -3,7 +3,7 @@
 import sys, os
 
 doc_directory = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(doc_directory, '..'))
+sys.path.append(os.path.join(doc_directory, '..', 'src'))
 
 import grooveshark.core.client
 import grooveshark.classes
@@ -17,7 +17,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 project = u'Grooveshark-Python'
-copyright = u'2011, linuxmaxi'
+copyright = u'2011, koehlma'
 
 version = '2.0'
 release = '2.0'
@@ -34,12 +34,12 @@ htmlhelp_basename = 'Grooveshark-Pythondoc'
 
 latex_documents = [
   ('index', 'Grooveshark-Python.tex', u'Grooveshark-Python Documentation',
-   u'linuxmaxi', 'manual'),
+   u'koehlma', 'manual'),
 ]
 
 man_pages = [
     ('index', 'grooveshark-python', u'Grooveshark-Python Documentation',
-     [u'linuxmaxi'], 1)
+     [u'koehlma'], 1)
 ]
 
 
