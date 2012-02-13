@@ -8,7 +8,7 @@ Examples
 ========
 * [Webapp](https://github.com/koehlma/pygrooveshark/tree/master/examples/webapp)
 * [popular_mplayer.py](https://github.com/koehlma/pygrooveshark/blob/master/examples/popular_mplayer.py)
-* [popular_vlc.py](https://github.com/koehlma/pygrooveshark/blob/master/examples/popular_mplayer.py)
+* [popular_vlc.py](https://github.com/koehlma/pygrooveshark/blob/master/examples/popular_vlc.py)
 
 Attention
 =========
