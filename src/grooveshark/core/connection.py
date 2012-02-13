@@ -18,6 +18,7 @@ import sys
 import contextlib
 import json
 import time
+import hashlib
 
 if sys.version[0] == '3':
     import urllib.request as urllib
