@@ -37,5 +37,6 @@ def main():
         if 'STATION_' + tag.upper() in translation:
             print('    | {:<36}| {:<32}|'.format(':const:`RADIO_' + tag.upper() + '`', translation['STATION_' + tag.upper()].replace('&amp;', ' and ')))
             print('    +-------------------------------------+---------------------------------+')
+
 if __name__ == '__main__':
     main()
