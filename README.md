@@ -4,6 +4,12 @@ You can find the documentation at http://koehlma.github.com/pygrooveshark/ ... T
 
 Supportes Python 2 and 3...
 
+Examples
+========
+* [Webapp](https://github.com/koehlma/pygrooveshark/tree/master/examples/webapp)
+* [popular_mplayer.py](https://github.com/koehlma/pygrooveshark/blob/master/examples/popular_mplayer.py)
+* [popular_vlc.py](https://github.com/koehlma/pygrooveshark/blob/master/examples/popular_mplayer.py)
+
 Attention
 =========
 This module is only a proof of concept and not an offical part of Grooveshark. Use it at your own risk. I am not responsible for any violations against the Grooveshark Terms of Service (It is not allowed to download music except for cache usage). Grooveshark Terms of Service: http://www.grooveshark.com/terms
