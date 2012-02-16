@@ -74,9 +74,9 @@ class Artist(object):
     
     def export(self):
         '''
-        Returns a dictionary with all song information.
+        Returns a dictionary with all artist information.
         Use the :meth:`from_export` method to recreate the
-        :class:`Song` object.
+        :class:`Artist` object.
         '''
         return {'id' : self.id, 'name' : self.name}
     
