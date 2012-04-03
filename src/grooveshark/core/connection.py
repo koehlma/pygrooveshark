@@ -100,22 +100,27 @@ class Connection():
         random_value = self._random_hex()
         return random_value + hashlib.sha1((method + ':' + self._token + ':' + CLIENTS[client]['token'] + ':' + random_value).encode('utf-8')).hexdigest()
     
-    def init(self):
+    def init(self, old_way=False):
         '''
         Initiate session, token and queue.
         '''
-        return self.init_session(), self.init_token(), self.init_queue()
+        return self.init_session(old_way), self.init_token(), self.init_queue()
     
-    def init_session(self):
+    def init_session(self, old_way=False):
         '''
         Initiate session.
         '''
-        request = urllib.Request('http://www.grooveshark.com/', headers={'User-Agent' : USER_AGENT})
-        response = self.urlopen(request)
-        self._session = re.search('PHPSESSID=([a-z0-9]*)', response.info()['Set-Cookie']).group(1)
-        self._secret = hashlib.md5(self._session.encode('utf-8')).hexdigest()
-        self.country = json.loads(re.search(r'\<script type="text/javascript"\>window\.gsConfig = (\{.*\});\<\/script\>',
-                                             response.read().decode('utf-8')).group(1))['country']
+        if old_way:
+            request = urllib.Request('http://www.grooveshark.com/', headers={'User-Agent' : USER_AGENT})
+            response = self.urlopen(request)
+            self._session = re.search('PHPSESSID=([a-z0-9]*)', response.info()['Set-Cookie']).group(1)
+            self._secret = hashlib.md5(self._session.encode('utf-8')).hexdigest()
+            self.country = json.loads(re.search(r'\<script type="text/javascript"\>window\.gsConfig = (\{.*\});\<\/script\>',
+                                                 response.read().decode('utf-8')).group(1))['country']
+        else:
+            self._session = hashlib.md5(str(random.randint(0, 99999999999999999)).encode('utf-8')).hexdigest()
+            self._secret = hashlib.md5(self._session.encode('utf-8')).hexdigest()
+            self.country = COUNTRY
         self._user = str(uuid.uuid4()).upper()
         return self._session, self._secret, self.country, self._user
     

@@ -13,6 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import random
+
 # time in seconds until a new communication token is needed
 TOKEN_TIMEOUT = 120
 # user agent used to access grooveshark
@@ -22,7 +24,10 @@ ALBUM_COVER_URL = 'http://images.grooveshark.com/static/albums/'
 # no cover url
 NO_COVER_URL = 'http://images.grooveshark.com/static/albums/70_album.png'
 # the grooveshark clients
-CLIENTS = {'htmlshark' : {'version' : '20120123',
-                          'token' : 'sloppyJoes'},
-           'jsqueue' : {'version' : '20120123.02',
-                        'token' : 'helloScumbagSteve'}}
+CLIENTS = {'htmlshark' : {'version' : '20120312',
+                          'token' : 'reallyHotSauce'},
+           'jsqueue' : {'version' : '20120312.02',
+                        'token' : 'circlesAndSquares'}}
+# grooveshark country settings
+COUNTRY = {'ID' : 221, 'CC1' : 0, 'CC2' : 0, 'CC3' : 0, 'CC4' : random.randint(1, 1000),
+           'DMA' : 0, 'IPR':0}
