@@ -27,7 +27,7 @@ if __name__ == '__main__':
     tags, translation = tags()
     print('Tags:')
     for tag, number in tags.items():
-        print('RADIO_%s = %i' % (tag.upper(), number))
+        print('    GENRE_{} = {}'.format(tag.upper(), number))
     print('\n')
     print('Documentation:')
     print('    +-------------------------------------+---------------------------------+')
@@ -35,5 +35,5 @@ if __name__ == '__main__':
     print('    +=====================================+=================================+')
     for tag in tags:
         if 'STATION_' + tag.upper() in translation:
-            print('    | {:<36}| {:<32}|'.format(':const:`RADIO_' + tag.upper() + '`', translation['STATION_' + tag.upper()].replace('&amp;', ' and ')))
+            print('    | {:<36}| {:<32}|'.format(':const:`Radio.GENRE_' + tag.upper() + '`', translation['STATION_' + tag.upper()].replace('&amp;', ' and ')))
             print('    +-------------------------------------+---------------------------------+')
