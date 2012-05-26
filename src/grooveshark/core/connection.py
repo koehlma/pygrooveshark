@@ -30,6 +30,7 @@ import random
 import re
 
 from grooveshark.core.const import *
+from grooveshark.core.session import Session
 
 class RequestError(Exception):
     '''
@@ -50,17 +51,8 @@ class Connection():
     :param queue_id: stored queue id as returned by :meth:`init_queue` method.
     :param proxies: dictionary mapping protocol to proxy.
     '''
-    def __init__(self, session=None, token=None, queue_id=None, proxies=None):
-        if session:
-            self._session = session[0]
-            self._secret = session[1]
-            self.country = session[2]
-            self._user = session[3]
-        if token:
-            self._token = token[0]
-            self._token_time = token[1]
-        if queue_id:
-            self.queue_id = queue_id
+    def __init__(self, session=None, proxies=None):
+        self.session = Session() if session is None else session
         self.urlopen = urllib.build_opener(urllib.ProxyHandler(proxies)).open
     
     def _random_hex(self):
@@ -74,69 +66,48 @@ class Connection():
         '''
         Generates json http request headers.
         '''
-        return {'Cookie' : 'PHPSESSID=' + self._session, 'Content-Type' : 'application/json',
-                'User-Agent' : USER_AGENT,
-                'Content-Type' : 'application/json'}
+        return {'Cookie' : 'PHPSESSID=' + self.session.session, 'Content-Type' : 'application/json',
+                'User-Agent' : USER_AGENT, 'Content-Type' : 'application/json'}
     
     def _get_token(self):
         '''
         Requests an communication token from grooveshark.
         '''
-        self._token = self.request('getCommunicationToken', {'secretKey' : self._secret},
-                                   {'uuid' :self._user,
-                                    'session' : self._session,
-                                    'clientRevision' : CLIENTS['htmlshark']['version'],
-                                    'country' : self.country,
-                                    'privacy' : 0,
-                                    'client' : 'htmlshark'})[1]
-        self._token_time = time.time()
+        self.session.token = self.request('getCommunicationToken', {'secretKey' : self.session.secret},
+                                          {'uuid' :self.session.user,
+                                           'session' : self.session.session,
+                                           'clientRevision' : CLIENTS['htmlshark']['version'],
+                                           'country' : self.session.country,
+                                           'privacy' : 0,
+                                           'client' : 'htmlshark'})[1]
+        self.session.time = time.time()
     
     def _request_token(self, method, client):
         '''
         Generates a request token.
         '''
-        if time.time() - self._token_time > TOKEN_TIMEOUT:
+        if time.time() - self.session.time > TOKEN_TIMEOUT:
             self._get_token()
         random_value = self._random_hex()
-        return random_value + hashlib.sha1((method + ':' + self._token + ':' + CLIENTS[client]['token'] + ':' + random_value).encode('utf-8')).hexdigest()
+        return random_value + hashlib.sha1((method + ':' + self.session.token + ':' + CLIENTS[client]['token'] + ':' + random_value).encode('utf-8')).hexdigest()
     
-    def init(self, old_way=False):
+    def init(self):
         '''
         Initiate session, token and queue.
         '''
-        return self.init_session(old_way), self.init_token(), self.init_queue()
-    
-    def init_session(self, old_way=False):
-        '''
-        Initiate session.
-        '''
-        if old_way:
-            request = urllib.Request('http://www.grooveshark.com/', headers={'User-Agent' : USER_AGENT})
-            response = self.urlopen(request)
-            self._session = re.search('PHPSESSID=([a-z0-9]*)', response.info()['Set-Cookie']).group(1)
-            self._secret = hashlib.md5(self._session.encode('utf-8')).hexdigest()
-            self.country = json.loads(re.search(r'\<script type="text/javascript"\>window\.gsConfig = (\{.*\});\<\/script\>',
-                                                 response.read().decode('utf-8')).group(1))['country']
-        else:
-            self._session = hashlib.md5(str(random.randint(0, 99999999999999999)).encode('utf-8')).hexdigest()
-            self._secret = hashlib.md5(self._session.encode('utf-8')).hexdigest()
-            self.country = COUNTRY
-        self._user = str(uuid.uuid4()).upper()
-        return self._session, self._secret, self.country, self._user
-    
+        return self.init_token(), self.init_queue()
+        
     def init_token(self):
         '''
         Initiate token.
         '''
         self._get_token()
-        return self._token, self._token_time
     
     def init_queue(self):
         '''
         Request queue id.
         '''
-        self.queue_id = self.request('initiateQueue', None, self.header('initiateQueue', 'jsqueue'))[1]
-        return self.queue_id
+        self.session.queue = self.request('initiateQueue', None, self.header('initiateQueue', 'jsqueue'))[1]
     
     def request(self, method, parameters, header):
         '''
@@ -160,8 +131,8 @@ class Connection():
         ''' 
         return {'token' : self._request_token(method, client),
                 'privacy' : 0,
-                'uuid' : self._user,
+                'uuid' : self.session.user,
                 'clientRevision' : CLIENTS[client]['version'],
-                'session' : self._session,
+                'session' : self.session.session,
                 'client' : client,
-                'country' : self.country}
+                'country' : self.session.country}

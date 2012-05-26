@@ -120,7 +120,7 @@ class Song(object):
         '''
         :class:`Stream` object for playing
         '''
-        stream_info = self._connection.request('getStreamKeyFromSongIDEx', {'songID' : self.id, 'country' : self._connection.country,
+        stream_info = self._connection.request('getStreamKeyFromSongIDEx', {'songID' : self.id, 'country' : self._connection.session.country,
                                                                             'prefetch' : False, 'mobile' : False},
                                                self._connection.header('getStreamKeyFromSongIDEx', 'jsqueue'))[1]
         return Stream(stream_info['ip'], stream_info['streamKey'], self._connection)
