@@ -23,7 +23,7 @@ from pyweb.core.server import simple_server
 from pyweb.core.application import Application
 from pyweb.handlers.directory import Directory
 
-from grooveshark.core.client import Client, SEARCH_TYPE_SONGS, SEARCH_TYPE_ALBUMS, SEARCH_TYPE_ARTISTS
+from grooveshark import Client
 from grooveshark.classes.song import Song
 
 class Cache():
@@ -124,9 +124,9 @@ class Grooveshark(Application):
         if not 'type' in request.query:
             request.qery['type'] = [SEARCH_TYPE_SONGS]
         if 'query' in request.query:
-            if not request.query['type'][0] in (SEARCH_TYPE_SONGS,
-                                                SEARCH_TYPE_ALBUMS,
-                                                SEARCH_TYPE_ARTISTS):
+            if not request.query['type'][0] in (Client.SONGS,
+                                                Client.ALBUMS,
+                                                Client.ARTISTS):
                 self._bad_request('unknown type', response)
             else:
                 result = [object.export() for object in self.client.search(request.query['query'][0], request.query['type'][0])]
