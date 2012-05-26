@@ -210,17 +210,7 @@ class Client(object):
         
         :rtype: tuple: (:meth:`init_session()`, :meth:`init_token()`, :meth:`init_queue()`)        
         '''
-        return (self.connection.init_session(), self.connection.init_token(), self.connection.init_queue())
-
-    def init_session(self):
-        '''
-        Fetch Grooveshark's session.
-        
-        :rtype: tuple: (session, secret, country, user)        
-        
-        You can store the returned tuple and use it again over the *session* argument of the :class:`Client` class. 
-        '''
-        return self.connection.init_session()
+        self.connection.init()
     
     def init_token(self):
         '''

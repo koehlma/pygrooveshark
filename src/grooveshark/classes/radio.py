@@ -41,8 +41,8 @@ class Radio(object):
         song = self._connection.request('autoplayGetSong', {'weightModifierRange' : [-9,9],
                                                             'seedArtists' : dict([(artist, 'p') for artist in self._artists]),
                                                             'tagID' : self._radio, 'recentArtists' : self._recent_artists, 
-                                                            'songQueueID' : self._connection.queue_id, 'secondaryArtistWeightModifier' : 0.75,
-                                                            'country' : self._connection.country, 'seedArtistWeightRange' : [110,130],
+                                                            'songQueueID' : self._connection.sesion.queue, 'secondaryArtistWeightModifier' : 0.75,
+                                                            'country' : self._connection.session.country, 'seedArtistWeightRange' : [110,130],
                                                             'songIDsAlreadySeen' : self._songs_already_seen, 'maxDuration' : 1500,
                                                             'minDuration' : 60, 'frowns' : []},
                                         self._connection.header('autoplayGetSong', 'jsqueue'))[1]
