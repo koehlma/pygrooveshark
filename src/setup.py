@@ -17,4 +17,4 @@ from distutils.core import setup
 
 setup(name='pygrooveshark',
       version='2.0',
-      packages=['grooveshark', 'grooveshark.core', 'grooveshark.classes'])
+      packages=['grooveshark',  'grooveshark.classes'])
