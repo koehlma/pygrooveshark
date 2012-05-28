@@ -15,6 +15,12 @@
 
 from distutils.core import setup
 
+from grooveshark import __version__
+
 setup(name='pygrooveshark',
-      version='2.0',
-      packages=['grooveshark',  'grooveshark.classes'])
+      version=__version__,
+      author='Maximilian Köhl',
+      author_email='linuxmaxi@googlemail.com',
+      url='http://www.github.com/koehlma/pygrooveshark',
+      license='GPLv3',
+      packages=['grooveshark', 'grooveshark.classes'])
