@@ -80,10 +80,10 @@ class Session():
 
 class Connection():
     '''
-    Lowlevel api communication.
+    Lowlevel API communication.
     
-    :param session: a :class:`Session` object with session information.
-    :param proxies: dictionary mapping protocol to proxy.
+    :param session: a :class:`Session` object with session information
+    :param proxies: dictionary mapping protocol to proxy
     '''
     def __init__(self, session=None, proxies=None):
         self.session = Session() if session is None else session
@@ -91,20 +91,20 @@ class Connection():
     
     def _random_hex(self):
         '''
-        Generates a random hex string.
+        generates a random hex string
         '''
         return ''.join([random.choice('0123456789abcdef') for i in range(6)])
     
     def _json_request_header(self):
         '''
-        Generates json http request headers.
+        generates json http request headers
         '''
         return {'Cookie' : 'PHPSESSID=' + self.session.session, 'Content-Type' : 'application/json',
                 'User-Agent' : grooveshark.const.USER_AGENT, 'Content-Type' : 'application/json'}
     
     def _get_token(self):
         '''
-        Requests an communication token from grooveshark.
+        requests an communication token from Grooveshark
         '''
         self.session.token = self.request('getCommunicationToken', {'secretKey' : self.session.secret},
                                           {'uuid' :self.session.user,
@@ -117,7 +117,7 @@ class Connection():
     
     def _request_token(self, method, client):
         '''
-        Generates a request token.
+        generates a request token
         '''
         if time.time() - self.session.time > grooveshark.const.TOKEN_TIMEOUT:
             self._get_token()
@@ -126,25 +126,25 @@ class Connection():
     
     def init(self):
         '''
-        Initiate session, token and queue.
+        initiate token and queue.
         '''
         return self.init_token(), self.init_queue()
         
     def init_token(self):
         '''
-        Initiate token.
+        initiate token
         '''
         self._get_token()
     
     def init_queue(self):
         '''
-        Request queue id.
+        request queue id
         '''
         self.session.queue = self.request('initiateQueue', None, self.header('initiateQueue', 'jsqueue'))[1]
     
     def request(self, method, parameters, header):
         '''
-        Grooveshark api request.
+        Grooveshark API request
         '''
         data = json.dumps({'parameters' : parameters, 'method' : method, 'header' : header})
         request = urllib.Request('https://grooveshark.com/more.php?%s' % (method),
@@ -160,7 +160,7 @@ class Connection():
     
     def header(self, method, client='htmlshark'):
         '''
-        Generates Grooveshark api json header.
+        generates Grooveshark API Json header
         ''' 
         return {'token' : self._request_token(method, client),
                 'privacy' : 0,
@@ -178,8 +178,8 @@ class Client(object):
     * search for songs, artists and albums
     * popular songs
     
-    :param session: a :class:`Session` object with session information.
-    :param proxies: dictionary mapping protocol to proxy.
+    :param session: a :class:`Session` object with session information
+    :param proxies: dictionary mapping protocol to proxy
     '''
     
     DAILY = 'daily'

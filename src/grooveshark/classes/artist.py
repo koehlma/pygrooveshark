@@ -16,14 +16,14 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 class Artist(object):
-    '''
+    """
     Represents an artist.
     Do not use this class directly.
         
     :param id: internal artist id
     :param name: name
     :param connection: underlying :class:`Connection` object
-    '''
+    """
     def __init__(self, id, name, connection):
         self._connection = connection
         self._id = id
@@ -40,23 +40,23 @@ class Artist(object):
 
     @property
     def id(self):
-        '''
+        """
         internal artist id
-        '''
+        """
         return self._id
     
     @property
     def name(self):
-        '''
+        """
         artist's name
-        '''
+        """
         return self._name
 
     @property
     def similar(self):
-        '''
+        """
         iterator over similar artists as :class:`Artist` objects
-        '''
+        """
         if self._similar is None:
             self._similar = [Artist(artist['ArtistID'], artist['Name'], self._connection) for artist in \
                              self._connection.request('artistGetSimilarArtists', {'artistID' : self.id},
@@ -65,9 +65,9 @@ class Artist(object):
     
     @property
     def songs(self):
-        '''
-        iterator ofer artist's songs as :class:`Song` objects
-        '''
+        """
+        iterator over artist's songs as :class:`Song` objects
+        """
         if self._songs is None:
             self._songs = [Song.from_response(song, self._connection) for song in \
                            self._connection.request('artistGetAllSongs', {'artistID' : self.id, 'isVerified' : True, 'offset' : 0},
@@ -75,11 +75,11 @@ class Artist(object):
         return iter(self._songs)
     
     def export(self):
-        '''
+        """
         Returns a dictionary with all artist information.
         Use the :meth:`from_export` method to recreate the
         :class:`Artist` object.
-        '''
+        """
         return {'id' : self.id, 'name' : self.name}
     
 from grooveshark.classes.song import Song

@@ -16,14 +16,15 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 class Radio(object):
-    '''
-    Listen to songs by specifc genre.
+    """
+    Listen to songs by specific genre.
     Do not use this class directly.
     
     :param artists: list of artist ids
     :param radio: the genre (see :class:`Client`'s :meth:`radio` method)
     :param connection: the underlying :class:`Connection` object
-    '''
+    """
+    
     GENRE_KPOP = 1765
     GENRE_CHINESE = 4266
     GENRE_RAGGA = 4281
@@ -187,6 +188,7 @@ class Radio(object):
     GENRE_CUMBIA = 4271
     GENRE_JUNGLE = 248
     GENRE_ZYDECO = 4290
+    
     def __init__(self, artists, radio, connection, recent_artists=[], songs_already_seen=[]):
         self._artists = [artist['ArtistID'] for artist in artists]
         self._radio = radio
@@ -200,9 +202,9 @@ class Radio(object):
     
     @property
     def song(self):
-        '''
+        """
         :class:`Song` object of next song to play
-        '''
+        """
         song = self._connection.request('autoplayGetSong', {'weightModifierRange' : [-9,9],
                                                             'seedArtists' : dict([(artist, 'p') for artist in self._artists]),
                                                             'tagID' : self._radio, 'recentArtists' : self._recent_artists, 
@@ -215,11 +217,11 @@ class Radio(object):
                     song['CoverArtUrl'], None, song['EstimateDuration'], None, self._connection)
     
     def export(self):
-        '''
+        """
         Returns a dictionary with all song information.
         Use the :meth:`from_export` method to recreate the
         :class:`Song` object.
-        '''
+        """
         return {'artists' : self._artists, 'radio' : self._radio, 'recent_artists' : self._recent_artists, 'songs_already_seen' : self._songs_already_seen}
     
 from grooveshark.classes.song import Song
