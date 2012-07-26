@@ -23,10 +23,13 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 6.2; rv:9.0.1) Gecko/20100101 Firefox/9.0.
 ALBUM_COVER_URL = 'http://images.grooveshark.com/static/albums/'
 # no cover url
 NO_COVER_URL = 'http://images.grooveshark.com/static/albums/70_album.png'
-# the grooveshark clients
+# the grooveshark clients - using API tokens from SciLor (scilor.com) now
+# because the ones I extracted out of Grooveshark do not work for some reason
+# (I meet SciLor, he tells me that they do some type of encryption but don't
+# know more) - thanks.
 CLIENTS = {'htmlshark' : {'version' : '20120312',
-                          'token' : 'reallyHotSauce'},
+                          'token' : 'breakfastBurritos'},
            'jsqueue' : {'version' : '20120312.02',
-                        'token' : 'circlesAndSquares'}}
+                        'token' : 'closeButNoCigar'}}
 # grooveshark country settings
 COUNTRY = {'ID': 221, 'CC1': 0, 'CC2': 0, 'CC3': 0, 'CC4': 0, 'DMA': 0, 'IPR': 0}
