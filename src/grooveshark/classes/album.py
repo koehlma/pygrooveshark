@@ -18,17 +18,17 @@
 from  grooveshark.const import *
 
 class Album(object):
-    '''
+    """
     Represents an album.
     Do not use this class directly.
         
     :param id: internal album id
     :param name: name
-    :param artist_id: artist's id to generate an :py:class:`Artist` object
-    :param artist_name: artist's name to generate an :py:class:`Artist` object
+    :param artist_id: artist's id to generate an :class:`Artist` object
+    :param artist_name: artist's name to generate an :class:`Artist` object
     :param cover_url: album's cover to generate an :class:`Album` object
     :param connection: underlying :class:`Connection` object
-    '''
+    """
     def __init__(self, id, name, artist_id, artist_name, cover_url, connection):
         self._connection = connection
         self._id = id
@@ -51,41 +51,41 @@ class Album(object):
     
     @property
     def id(self):
-        '''
+        """
         internal album id
-        '''
+        """
         return self._id
     
     @property
     def name(self):
-        '''
+        """
         album's name
-        '''
+        """
         return self._name
     
     @property
     def artist(self):
-        '''
+        """
         :class:`Artist` object of album's artist
-        '''
+        """
         if not self._artist:
             self._artist = Artist(self._artist_id, self._artist_name, self._connection)
         return self._artist
     
     @property
     def cover(self):
-        '''
+        """
         album cover as :class:`Picture` object
-        '''
+        """
         if not self._cover:
             self._cover = Picture(self._cover_url, self._connection)
         return self._cover
     
     @property
     def songs(self):
-        '''
+        """
         iterator over album's songs as :class:`Song` objects
-        '''
+        """
         if self._songs is None:
             self._songs = [Song.from_response(song, self._connection) for song in \
                            self._connection.request('albumGetSongs', {'albumID' : self.id, 'isVerified' : False, 'offset' : 0},
@@ -93,11 +93,11 @@ class Album(object):
         return iter(self._songs)
     
     def export(self):
-        '''
+        """
         Returns a dictionary with all album information.
         Use the :meth:`from_export` method to recreate the
         :class:`Album` object.
-        '''
+        """
         return {'id' : self.id, 'name' : self.name, 'artist' : self._artist_name, 'artist_id' : self._artist_id, 'cover' : self._cover_url}
     
 from grooveshark.classes.song import Song

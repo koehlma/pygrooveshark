@@ -18,22 +18,22 @@
 from grooveshark.const import *
 
 class Song(object):
-    '''
+    """
     Represents a song.
     Do not use this class directly.
         
     :param id: internal song id
     :param name: name
-    :param artist_id: artist's id to generate an :py:class:`Artist` object
-    :param artist_name: artist's name to generate an :py:class:`Artist` object
+    :param artist_id: artist's id to generate an :class:`Artist` object
+    :param artist_name: artist's name to generate an :class:`Artist` object
     :param album_id: album's id to generate an :class:`Album` object
     :param album_name: album's name to generate an :class:`Album` object
     :param cover_url: album's cover to generate an :class:`Album` object
     :param track: track number
     :param duration: estimate song duration
-    :param popularity: populaity
+    :param popularity: popularity
     :param connection: underlying :class:`Connection` object
-    '''
+    """
     def __init__(self, id, name, artist_id, artist_name, album_id, album_name, cover_url, track, duration, popularity, connection):
         self._connection = connection
         self._id = id
@@ -66,73 +66,73 @@ class Song(object):
     
     @property
     def id(self):
-        '''
+        """
         internal song id
-        '''
+        """
         return self._id
     
     @property
     def name(self):
-        '''
-        name
-        '''
+        """
+        song name
+        """
         return self._name
     
     @property
     def artist(self):
-        '''
+        """
         artist as :class:`Artist` object
-        '''
+        """
         if not self._artist:
             self._artist = Artist(self._artist_id, self._artist_name, self._connection)
         return self._artist
     
     @property
     def album(self):
-        '''
+        """
         album as :class:`Album` object
-        '''
+        """
         if not self._album:
             self._album = Album(self._album_id, self._album_name, self._artist_id, self._artist_name, self._cover_url, self._connection)
         return self._album
     
     @property
     def track(self):
-        '''
+        """
         track number
-        '''
+        """
         return self._track
     
     @property
     def duration(self):
-        '''
+        """
         estimate song duration
-        '''
+        """
         return self._duration
     
     @property
     def popularity(self):
-        '''
+        """
         popularity
-        '''
+        """
         return self._popularity
     
     @property
     def stream(self):
-        '''
+        """
         :class:`Stream` object for playing
-        '''
+        """
         stream_info = self._connection.request('getStreamKeyFromSongIDEx', {'songID' : self.id, 'country' : self._connection.session.country,
                                                                             'prefetch' : False, 'mobile' : False},
                                                self._connection.header('getStreamKeyFromSongIDEx', 'jsqueue'))[1]
         return Stream(stream_info['ip'], stream_info['streamKey'], self._connection)
     
     def export(self):
-        '''
+        """
         Returns a dictionary with all song information.
         Use the :meth:`from_export` method to recreate the
         :class:`Song` object.
-        '''
+        """
         return {'id' : self.id, 'name' : self.name, 'artist' : self._artist_name, 'artist_id' : self._artist_id,
                 'album' : self._album_name, 'album_id' : self._album_id, 'track' : self.track,
                 'duration' : self.duration, 'popularity' : self.popularity, 'cover' : self._cover_url}

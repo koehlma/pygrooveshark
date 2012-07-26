@@ -27,14 +27,14 @@ else:
 from grooveshark.const import *
 
 class Stream(object):
-    '''
+    """
     Get song's raw data.
     Do not use this class directly.
         
-    :param ip: streaming server adress
+    :param ip: streaming server address
     :param key: streaming key required to get the stream
     :param connection: underlying :class:`Connection` object
-    '''
+    """
     def __init__(self, ip, key, connection):
         self._ip = ip
         self._key = key
@@ -50,25 +50,25 @@ class Stream(object):
     
     @property
     def url(self):
-        '''
-        Stream URL.
-        '''
+        """
+        stream URL
+        """
         return 'http://%s/stream.php?streamKey=%s' % (self._ip, quote_plus(self._key))
        
     @property
     def data(self):
-        '''
-        A file-like object containing song's raw data.
-        '''
+        """
+        a file-like object containing song's raw data
+        """
         if not self._data:
             self._request()
         return self._data
     
     @property
     def size(self):
-        '''
-        Size of the song's raw data in bytes.
-        '''
+        """
+        size of the song's raw data in bytes
+        """
         if not self._size:
             self._request()
         return self._size    
