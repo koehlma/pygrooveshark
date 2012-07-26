@@ -1,5 +1,5 @@
-Welcome to Grooveshark-Python's documentation!
-==============================================
+Python Grooveshark
+==================
 
 .. autoclass:: grooveshark.Client
    :members:
