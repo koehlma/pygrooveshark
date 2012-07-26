@@ -15,12 +15,25 @@
 
 from distutils.core import setup
 
-from grooveshark import __version__
+import grooveshark
 
-setup(name='pygrooveshark',
-      version=__version__,
-      author='Maximilian Köhl',
-      author_email='linuxmaxi@googlemail.com',
-      url='http://www.github.com/koehlma/pygrooveshark',
-      license='GPLv3',
-      packages=['grooveshark', 'grooveshark.classes'])
+setup(name=grooveshark.__short_name__,
+      version=grooveshark.__version__,
+      description=grooveshark.__desc_short__,
+      long_description=grooveshark.__desc_long__,
+      author=grooveshark.__author__,
+      author_email=grooveshark.__email__,
+      url=grooveshark.__website__,
+      download_url=grooveshark.__download_url__,
+      license='GPLv3+',
+      packages=['grooveshark', 'grooveshark.classes'],
+      classifiers=[
+          'Development Status :: 5 - Production/Stable',
+          'Intended Audience :: Developers',
+          'License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)',
+          'Operating System :: MacOS :: MacOS X', # Should work on MacOS X I think...
+          'Operating System :: Microsoft :: Windows',
+          'Operating System :: POSIX',
+          'Programming Language :: Python :: 2',
+          'Programming Language :: Python :: 3',
+          'Topic :: Multimedia :: Sound/Audio'])
