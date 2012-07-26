@@ -189,8 +189,8 @@ class Client(object):
     ARTISTS = 'Artists'
     ALBUMS = 'Albums'
     
-    def __init__(self, *args, **kwargs):
-        self.connection = Connection(*args, **kwargs)
+    def __init__(self, session=None, proxies=None):
+        self.connection = Connection(session, proxies)
 
     def init(self):
         '''
