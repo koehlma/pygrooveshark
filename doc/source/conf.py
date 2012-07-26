@@ -46,7 +46,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Grooveshark-Python'
+project = u'Python Grooveshark'
 copyright = u'2012, Maximilian Köhl'
 
 # The version info for the project you're documenting, acts as replacement for
