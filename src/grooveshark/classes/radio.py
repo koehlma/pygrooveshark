@@ -196,6 +196,10 @@ class Radio(object):
         self._recent_artists = list(recent_artists)
         self._songs_already_seen = list(songs_already_seen)
     
+    def __iter__(self):
+        while True:
+            yield self.song
+    
     @classmethod
     def from_export(cls, export, connection):
         return cls(export['artists'], export['radio'], connection, export['recent_artists'], export['songs_already_seen'])
@@ -208,7 +212,7 @@ class Radio(object):
         song = self._connection.request('autoplayGetSong', {'weightModifierRange' : [-9,9],
                                                             'seedArtists' : dict([(artist, 'p') for artist in self._artists]),
                                                             'tagID' : self._radio, 'recentArtists' : self._recent_artists, 
-                                                            'songQueueID' : self._connection.sesion.queue, 'secondaryArtistWeightModifier' : 0.75,
+                                                            'songQueueID' : self._connection.session.queue, 'secondaryArtistWeightModifier' : 0.75,
                                                             'country' : self._connection.session.country, 'seedArtistWeightRange' : [110,130],
                                                             'songIDsAlreadySeen' : self._songs_already_seen, 'maxDuration' : 1500,
                                                             'minDuration' : 60, 'frowns' : []},
