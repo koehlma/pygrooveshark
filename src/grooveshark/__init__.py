@@ -292,7 +292,7 @@ class Client(object):
             cover_url = '%sm%s' % (grooveshark.const.PLAYLIST_COVER_URL, playlist['Picture'])
         else:
             cover_url = None
-        return Playlist(playlist['PlaylistID'], playlist['Name'], cover_url)
+        return Playlist(playlist['PlaylistID'], playlist['Name'], cover_url, self.connection)
        
     def search(self, query, type=SONGS):
         '''
