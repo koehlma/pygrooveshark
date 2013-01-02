@@ -188,6 +188,7 @@ class Client(object):
     SONGS = 'Songs'
     ARTISTS = 'Artists'
     ALBUMS = 'Albums'
+    PLAYLISTS = 'Playlists'
     
     def __init__(self, session=None, proxies=None):
         self.connection = Connection(session, proxies)
@@ -282,6 +283,16 @@ class Client(object):
         else:
             cover_url = None
         return Album(album['AlbumID'], album['Name'], album['ArtistID'], album['ArtistName'], cover_url, self.connection)
+
+    def _parse_playlist(self, playlist):
+        '''
+        Parse search json-data and create a :class:`Playlist` object.
+        '''
+        if playlist['Picture']:
+            cover_url = '%s70_%s' % (grooveshark.const.PLAYLIST_COVER_URL, playlist['Picture'])
+        else:
+            cover_url = None
+        return Playlist(playlist['PlaylistID'], playlist['Name'], cover_url, self.connection)
        
     def search(self, query, type=SONGS):
         '''
@@ -302,6 +313,8 @@ class Client(object):
         +---------------------------------+---------------------------------+
         | :const:`Client.ALBUMS`          | Search for albums               |
         +---------------------------------+---------------------------------+
+        | :const:`Client.PLAYLISTS`       | Search for playlists            |
+        +---------------------------------+---------------------------------+
         '''
         result = self.connection.request('getResultsFromSearch', {'query' : query, 'type' : type, 'guts' : 0, 'ppOverride' : False},
                                          self.connection.header('getResultsFromSearch'))[1]['result']
@@ -311,6 +324,8 @@ class Client(object):
             return (Artist(artist['ArtistID'], artist['Name'], self.connection) for artist in result)
         elif type == self.ALBUMS:
             return (self._parse_album(album) for album in result)
+        elif type == self.PLAYLISTS:
+            return (self._parse_playlist(playlist) for playlist in result)
 
     def popular(self, period=DAILY):
         '''
@@ -331,3 +346,13 @@ class Client(object):
         '''
         songs = self.connection.request('popularGetSongs', {'type' : period}, self.connection.header('popularGetSongs'))[1]['Songs']
         return (Song.from_response(song, self.connection) for song in songs)
+
+    def playlist(self, playlist_id):
+        '''
+        Get a playlist from it's ID
+        
+        :param playlist_id: ID of the playlist
+        :rtype: a :class:`Playlist` object
+        '''
+        playlist = self.connection.request('getPlaylistByID', {'playlistID' : playlist_id}, self.connection.header('getPlaylistByID'))[1]
+        return self._parse_playlist(playlist)

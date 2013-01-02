@@ -21,6 +21,8 @@ TOKEN_TIMEOUT = 1200
 USER_AGENT = 'Mozilla/5.0 (Windows NT 6.2; rv:9.0.1) Gecko/20100101 Firefox/9.0.1'
 # url where album covers are located
 ALBUM_COVER_URL = 'http://images.grooveshark.com/static/albums/'
+# url where playlists covers are located
+PLAYLIST_COVER_URL = 'http://images.grooveshark.com/static/playlists/'
 # no cover url
 NO_COVER_URL = 'http://images.grooveshark.com/static/albums/70_album.png'
 # the grooveshark clients - using API tokens from SciLor (scilor.com) now
