@@ -289,7 +289,7 @@ class Client(object):
         Parse search json-data and create a :class:`Playlist` object.
         '''
         if playlist['Picture']:
-            cover_url = '%sm%s' % (grooveshark.const.PLAYLIST_COVER_URL, playlist['Picture'])
+            cover_url = '%s70_%s' % (grooveshark.const.PLAYLIST_COVER_URL, playlist['Picture'])
         else:
             cover_url = None
         return Playlist(playlist['PlaylistID'], playlist['Name'], cover_url, self.connection)
