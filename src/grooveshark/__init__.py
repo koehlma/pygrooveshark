@@ -356,3 +356,17 @@ class Client(object):
         '''
         playlist = self.connection.request('getPlaylistByID', {'playlistID' : playlist_id}, self.connection.header('getPlaylistByID'))[1]
         return self._parse_playlist(playlist)
+
+    def collection(self, user_id):
+        """
+        Get the song collection of a user.
+
+        :param user_id: ID of a user.
+        :rtype: list of :class:`Song`
+        """
+        # TODO further evaluation of the page param, I don't know where the limit is.
+        dct = {'userID' : user_id, 'page' : 0}
+        r = 'userGetSongsInLibrary'
+        result = self.connection.request(r, dct, self.connection.header(r))
+        songs = result[1]['Songs']
+        return [Song.from_response(song, self.connection) for song in songs]
