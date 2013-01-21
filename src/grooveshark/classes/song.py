@@ -15,6 +15,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+import os
+
 from grooveshark.const import *
 
 class Song(object):
@@ -136,7 +138,32 @@ class Song(object):
         return {'id' : self.id, 'name' : self.name, 'artist' : self._artist_name, 'artist_id' : self._artist_id,
                 'album' : self._album_name, 'album_id' : self._album_id, 'track' : self.track,
                 'duration' : self.duration, 'popularity' : self.popularity, 'cover' : self._cover_url}
-        
+
+    def format(self, pattern):
+        """
+        Format the song according to certain patterns:
+
+        %a: artist title
+        %s: song title
+        %A: album title
+        """
+        pattern = pattern.replace('%a', self.artist.name)
+        pattern = pattern.replace('%s', self.name)
+        return pattern.replace('%A', self.album.name)
+
+    def download(self, directory='~/Music', song_name='%a - %s - %A'):
+        """
+        Download a song to a directory.
+
+        :param directory: A system file path.
+        :param song_name: A name that will be formatted with :meth:`format`.
+        """
+        formatted = self.format(song_name)
+        path = os.path.expanduser(directory) + os.path.sep + formatted + '.mp3'
+
+        with open(path, 'wb') as f:
+            f.write(self.stream.data.read())
+
 from grooveshark.classes.artist import Artist
 from grooveshark.classes.album import Album
 from grooveshark.classes.stream import Stream
