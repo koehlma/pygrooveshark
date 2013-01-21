@@ -223,7 +223,7 @@ class Client(object):
         
         Genres:
         
-        This list is incomplete because there isn't a English translation for some genres.
+        This list is incomplete because there isn't an English translation for some genres.
         Please look at the sources for all possible Tags.
         
         +-------------------------------------+---------------------------------+
