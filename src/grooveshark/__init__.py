@@ -370,3 +370,16 @@ class Client(object):
         result = self.connection.request(r, dct, self.connection.header(r))
         songs = result[1]['Songs']
         return [Song.from_response(song, self.connection) for song in songs]
+
+    def favorites(self, user_id):
+        """
+        Get the favorite songs of a user.
+
+        :param user_id: ID of a user.
+        :rtype: list of :class:`Song`
+        """
+        dct = {'userID' : user_id, "ofWhat" : "Songs"}
+        r = 'getFavorites'
+        result = self.connection.request(r, dct, self.connection.header(r))
+        songs = result[1]
+        return [Song.from_response(song, self.connection) for song in songs]
