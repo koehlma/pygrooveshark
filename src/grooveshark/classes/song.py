@@ -157,12 +157,14 @@ class Song(object):
 
         :param directory: A system file path.
         :param song_name: A name that will be formatted with :meth:`format`.
+        :return: The formatted song name.
         """
         formatted = self.format(song_name)
         path = os.path.expanduser(directory) + os.path.sep + formatted + '.mp3'
 
         with open(path, 'wb') as f:
             f.write(self.stream.data.read())
+        return formatted
 
 from grooveshark.classes.artist import Artist
 from grooveshark.classes.album import Album
