@@ -149,7 +149,8 @@ class Song(object):
         """
         pattern = pattern.replace('%a', self.artist.name)
         pattern = pattern.replace('%s', self.name)
-        return pattern.replace('%A', self.album.name)
+        pattern = pattern.replace('%A', self.album.name)
+        return pattern.replace('/', '').replace('\\', '')
 
     def download(self, directory='~/Music', song_name='%a - %s - %A'):
         """
