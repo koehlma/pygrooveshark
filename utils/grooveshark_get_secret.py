@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 #
-# Copyright (C) 2012, Maximilian Köhl <linuxmaxi@googlemail.com>
+# Copyright (C) 2013, Maximilian Köhl <linuxmaxi@googlemail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -25,12 +25,12 @@ compare the result with the sniffed request token. If they match we have found
 the correct security token.
 """ 
 
+__version__ = '1.0'
+
 import argparse
 import hashlib
 import os
 import re
-
-__version__ = '1.0'
 
 token_format = re.compile(b'[a-z]+([A-Z][a-z]+)+')
 

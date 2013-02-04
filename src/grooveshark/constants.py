@@ -15,12 +15,14 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-__all__ = ['Song', 'Artist', 'Album', 'Radio', 'Stream', 'Picture', 'Playlist']
+from __future__ import unicode_literals, division
 
-from grooveshark.classes.song import Song
-from grooveshark.classes.artist import Artist
-from grooveshark.classes.album import Album
-from grooveshark.classes.radio import Radio
-from grooveshark.classes.stream import Stream
-from grooveshark.classes.picture import Picture
-from grooveshark.classes.playlist import Playlist
+class Constants():
+    token_timeout = 1200
+    user_agent = ('Mozilla/5.0 (Windows NT 6.2; Win64; x64; rv:16.0.1) '
+                  'Gecko/20121011 Firefox/16.0.1')
+    album_cover = 'http://images.grooveshark.com/static/albums/'
+    playlist_cover= 'http://images.grooveshark.com/static/playlists/'
+    no_cover = 'http://images.grooveshark.com/static/albums/90_album.png'
+    country = {'ID' : 0, 'CC4' : 0, 'CC2' : 0, 'CC3' : 0, 'IPR' : 0, 'DMA' : 0,
+               'CC1' : 0}

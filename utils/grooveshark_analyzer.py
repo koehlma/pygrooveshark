@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 #
-# Copyright (C) 2012, Maximilian Köhl <linuxmaxi@googlemail.com>
+# Copyright (C) 2013, Maximilian Köhl <linuxmaxi@googlemail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,6 +40,8 @@ Run this tool and configure FoxyProxy (Firefox AddOn) to route all requests to
 `127.0.0.1:12345`.
 """
 
+__version__ = '1.0'
+
 import argparse
 import gzip
 import http.cookies
@@ -52,8 +54,6 @@ import threading
 import urllib.request
 import urllib.parse
 import zlib
-
-__version__ = '1.0'
 
 __path__ = os.path.dirname(__file__)
 
@@ -75,6 +75,7 @@ class Proxy(http.server.BaseHTTPRequestHandler):
         api_request = json.loads(data.decode('utf-8'))
         # build and open a new request to the real api
         request = urllib.request.Request(self.path, data, self.headers)
+        request.get_method = lambda: self.command
         try:
             response = urllib.request.urlopen(request)
         except urllib.request.URLError as error:
@@ -102,33 +103,47 @@ class Proxy(http.server.BaseHTTPRequestHandler):
         # store the sessions communication token
         if api_request['method'] == 'getCommunicationToken':
             self.server.sessions[session]['token'] = api_response['result']
-        # display request information
-        with server.lock:
-            print('--> Session "{}":'.format(session))
-            print(('    --> Communication Token: {}'
-                   ).format(self.server.sessions[session]['token']))
-            print('    --> Method: {}'.format(api_request['method']))
-            print(('    --> Client: {}/{}')
-                  .format(api_request['header']['client'],
-                          api_request['header']['clientRevision']))
-            print('    --> UUID: {}'.format(api_request['header']['uuid']))
-            print(('    --> Country: "{}"'
-                   ).format(api_request['header']['country']))
-            print('    --> Token: {}'.format(api_request['header']['token']))
-            print('    --> Parameters:')
-            for key, value in api_request['parameters'].items():
-                print('        --> "{}" : "{}"'.format(key, str(value)[:80]))
-            print('    --> Result:')
-            if isinstance(api_response['result'], dict):
-                for key, value in api_response['result'].items():
+        if self.server.methods is not None:
+            # check for a new method and display method information
+            if api_request['method'] not in self.server.methods:
+                with server.lock:
+                    self.server.methods.append(api_request['method'])
+                    print('--> New Method "{}":'.format(api_request['method']))
+                    print(('    --> Client: "{}"'
+                           ).format(api_request['header']['client']))
+                    print(('    --> Parameters: "{}"'
+                           ).format(('", "'
+                                     ).join(api_request['parameters'].keys())))
+        else:
+            # display request information
+            with server.lock:
+                print('--> Session "{}":'.format(session))
+                print(('    --> Communication Token: {}'
+                       ).format(self.server.sessions[session]['token']))
+                print('    --> Method: {}'.format(api_request['method']))
+                print(('    --> Client: {}/{}')
+                      .format(api_request['header']['client'],
+                              api_request['header']['clientRevision']))
+                print('    --> UUID: {}'.format(api_request['header']['uuid']))
+                print(('    --> Country: "{}"'
+                       ).format(api_request['header']['country']))
+                print(('    --> Token: {}'
+                       ).format(api_request['header']['token']))
+                print('    --> Parameters:')
+                for key, value in api_request['parameters'].items():
                     print('        --> "{}" : "{}"'.format(key,
                                                            str(value)[:80]))
-            elif isinstance(api_response['result'], list):
-                for value in api_response['result']:
-                    print('        --> "{}"'.format(str(value)[:80]))
-            else:
-                print('        --> "{}"'.format(str(api_response['result']
-                                                    )[:80])) 
+                print('    --> Result:')
+                if isinstance(api_response['result'], dict):
+                    for key, value in api_response['result'].items():
+                        print('        --> "{}" : "{}"'.format(key,
+                                                               str(value)[:80]))
+                elif isinstance(api_response['result'], list):
+                    for value in api_response['result']:
+                        print('        --> "{}"'.format(str(value)[:80]))
+                else:
+                    print('        --> "{}"'.format(str(api_response['result']
+                                                        )[:80])) 
         
     def _proxy(self):
         if self.ssl:
@@ -183,6 +198,8 @@ if __name__ == '__main__':
                         help='ssl certificate for man in the middle',
                         default=os.path.join(__path__, 'analyzer',
                                              'grooveshark.crt'))
+    parser.add_argument('--methods', default=False, action='store_true',
+                        help='create a list of available methods')
     
     arguments = parser.parse_args()
     
@@ -195,5 +212,6 @@ if __name__ == '__main__':
     server.ssl_key = arguments.ssl_key
     server.ssl_cert = arguments.ssl_cert
     server.lock = threading.Lock()
+    server.methods = [] if arguments.methods else None
     server.sessions = {}
     server.serve_forever()
