@@ -19,7 +19,7 @@ import sys, os
 #sys.path.insert(0, os.path.abspath('.'))
 
 doc_directory = os.path.dirname(os.path.abspath(__file__))
-sys.path.append(os.path.join(doc_directory, '..', '..', 'src'))
+sys.path.append(os.path.join(doc_directory, '..', '..'))
 
 import grooveshark
 import grooveshark.classes
