@@ -15,3 +15,7 @@ __desc_long__ = ('This is an unofficial Grooveshark API for Python. It supports'
                  'artists and listening to radio stations. This also works in'
                  'Germany where Grooveshark officially is not available. It'
                  'supports Python 2 as well as Python 3.')
+
+__all__ = ['__version__', '__project__', '__short_name__', '__author__',
+           '__email__', '__website__', '__download_url__', '__source__',
+           '__vcs__', '__copyright__', '__desc_short__', '__desc_long__']
