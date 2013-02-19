@@ -32,6 +32,7 @@ else:
 
 import grooveshark.const
 from grooveshark.classes import *
+from grooveshark.version import *
 
 __all__ = ['Session', 'Client', 'Connection', 'GroovesharkError', 'RequestError', 'UnknownError']
 
