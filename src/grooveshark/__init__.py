@@ -65,15 +65,15 @@ class Session():
         self.queue = None
         self.token = None
         self.time = None
-    
+
     def __repr__(self):
         return '<Session user="{}", sessions="{}", secret="{}", country="{}">'.format(self.user, self.session, self.secret, self.country)
-    
+
     @classmethod
     def open(cls, filename):
         with open(filename, 'rb') as input:
             return pickle.load(input)
-    
+
     def save(self, filename):
         with open(filename, 'wb') as output:
             pickle.dump(self, output)
@@ -81,27 +81,27 @@ class Session():
 class Connection():
     '''
     Lowlevel API communication.
-    
+
     :param session: a :class:`Session` object with session information
     :param proxies: dictionary mapping protocol to proxy
     '''
     def __init__(self, session=None, proxies=None):
         self.session = Session() if session is None else session
         self.urlopen = urllib.build_opener(urllib.ProxyHandler(proxies)).open
-    
+
     def _random_hex(self):
         '''
         generates a random hex string
         '''
         return ''.join([random.choice('0123456789abcdef') for i in range(6)])
-    
+
     def _json_request_header(self):
         '''
         generates json http request headers
         '''
         return {'Cookie' : 'PHPSESSID=' + self.session.session, 'Content-Type' : 'application/json',
                 'User-Agent' : grooveshark.const.USER_AGENT, 'Content-Type' : 'application/json'}
-    
+
     def _get_token(self):
         '''
         requests an communication token from Grooveshark
@@ -114,7 +114,7 @@ class Connection():
                                            'privacy' : 0,
                                            'client' : 'htmlshark'})[1]
         self.session.time = time.time()
-    
+
     def _request_token(self, method, client):
         '''
         generates a request token
@@ -123,25 +123,25 @@ class Connection():
             self._get_token()
         random_value = self._random_hex()
         return random_value + hashlib.sha1((method + ':' + self.session.token + ':' + grooveshark.const.CLIENTS[client]['token'] + ':' + random_value).encode('utf-8')).hexdigest()
-    
+
     def init(self):
         '''
         initiate token and queue.
         '''
         return self.init_token(), self.init_queue()
-        
+
     def init_token(self):
         '''
         initiate token
         '''
         self._get_token()
-    
+
     def init_queue(self):
         '''
         request queue id
         '''
         self.session.queue = self.request('initiateQueue', None, self.header('initiateQueue', 'jsqueue'))[1]
-    
+
     def request(self, method, parameters, header):
         '''
         Grooveshark API request
@@ -157,11 +157,11 @@ class Connection():
                 raise RequestError(result['fault']['message'], result['fault']['code'])
             else:
                 raise UnknownError(result)
-    
+
     def header(self, method, client='htmlshark'):
         '''
         generates Grooveshark API Json header
-        ''' 
+        '''
         return {'token' : self._request_token(method, client),
                 'privacy' : 0,
                 'uuid' : self.session.user,
@@ -169,63 +169,63 @@ class Connection():
                 'session' : self.session.session,
                 'client' : client,
                 'country' : self.session.country}
-        
+
 class Client(object):
     '''
     A client for Grooveshark's API which supports:
-        
+
     * radio (songs by genre)
     * search for songs, artists and albums
     * popular songs
-    
+
     :param session: a :class:`Session` object with session information
     :param proxies: dictionary mapping protocol to proxy
     '''
-    
+
     DAILY = 'daily'
     MONTHLY = 'monthly'
-    
+
     SONGS = 'Songs'
     ARTISTS = 'Artists'
     ALBUMS = 'Albums'
     PLAYLISTS = 'Playlists'
-    
+
     def __init__(self, session=None, proxies=None):
         self.connection = Connection(session, proxies)
 
     def init(self):
         '''
         Fetch Grooveshark's token and queue id.
-        
-        :rtype: tuple: (:meth:`init_session()`, :meth:`init_token()`, :meth:`init_queue()`)        
+
+        :rtype: tuple: (:meth:`init_session()`, :meth:`init_token()`, :meth:`init_queue()`)
         '''
         self.connection.init()
-    
+
     def init_token(self):
         '''
         Fetch Grooveshark's communication token.
         '''
         return self.connection.init_token()
-    
+
     def init_queue(self):
         '''
         Initiate queue.
         Make sure to call :meth:`init_token()` first.
         '''
         return self.connection.init_queue()
-    
+
     def radio(self, radio):
         '''
         Get songs belong to a specific genre.
-        
+
         :param radio: genre to listen to
         :rtype: a :class:`Radio` object
-        
+
         Genres:
-        
+
         This list is incomplete because there isn't an English translation for some genres.
         Please look at the sources for all possible Tags.
-        
+
         +-------------------------------------+---------------------------------+
         | Constant                            | Genre                           |
         +=====================================+=================================+
@@ -273,7 +273,7 @@ class Client(object):
         artists = self.connection.request('getArtistsForTagRadio', {'tagID' : radio},
                                           self.connection.header('getArtistsForTagRadio', 'jsqueue'))[1]
         return Radio(artists, radio, self.connection)
-    
+
     def _parse_album(self, album):
         '''
         Parse search json-data and create an :class:`Album` object.
@@ -293,17 +293,17 @@ class Client(object):
         else:
             cover_url = None
         return Playlist(playlist['PlaylistID'], playlist['Name'], cover_url, self.connection)
-       
+
     def search(self, query, type=SONGS):
         '''
         Search for songs, artists and albums.
-        
+
         :param query: search string
         :param type: type to search for
         :rtype: a generator generates :class:`Song`, :class:`Artist` and :class:`Album` objects
-        
+
         Search Types:
-               
+
         +---------------------------------+---------------------------------+
         | Constant                        | Meaning                         |
         +=================================+=================================+
@@ -330,12 +330,12 @@ class Client(object):
     def popular(self, period=DAILY):
         '''
         Get popular songs.
-        
-        :param period: time period 
+
+        :param period: time period
         :rtype: a generator generates :class:`Song` objects
-        
+
         Time periods:
-        
+
         +---------------------------------+-------------------------------------+
         | Constant                        | Meaning                             |
         +=================================+=====================================+
@@ -350,7 +350,7 @@ class Client(object):
     def playlist(self, playlist_id):
         '''
         Get a playlist from it's ID
-        
+
         :param playlist_id: ID of the playlist
         :rtype: a :class:`Playlist` object
         '''
