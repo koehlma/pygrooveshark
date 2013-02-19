@@ -30,7 +30,7 @@ class Stream(object):
     """
     Get song's raw data.
     Do not use this class directly.
-        
+
     :param ip: streaming server address
     :param key: streaming key required to get the stream
     :param connection: underlying :class:`Connection` object
@@ -41,20 +41,34 @@ class Stream(object):
         self._connection = connection
         self._data = None
         self._size = None
-        
+
     def _request(self):
         request = urllib.Request('http://%s/stream.php' % (self._ip), data=urlencode({'streamKey' : self._key}).encode('utf-8'),
                                          headers={'User-Agent' : USER_AGENT})
         self._data = self._connection.urlopen(request)
         self._size = int(self.data.info()['Content-Length'])
-    
+
+    @property
+    def ip(self):
+        """
+        stream server IP
+        """
+        return self._ip
+
+    @property
+    def key(self):
+        """
+        stream key
+        """
+        return self._key
+
     @property
     def url(self):
         """
         stream URL
         """
         return 'http://%s/stream.php?streamKey=%s' % (self._ip, quote_plus(self._key))
-       
+
     @property
     def data(self):
         """
@@ -63,7 +77,7 @@ class Stream(object):
         if not self._data:
             self._request()
         return self._data
-    
+
     @property
     def size(self):
         """
@@ -71,4 +85,4 @@ class Stream(object):
         """
         if not self._size:
             self._request()
-        return self._size    
+        return self._size
