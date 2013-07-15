@@ -29,9 +29,9 @@ NO_COVER_URL = 'http://images.grooveshark.com/static/albums/70_album.png'
 # because the ones I extracted out of Grooveshark do not work for some reason
 # (I meet SciLor, he tells me that they do some type of encryption but don't
 # know more) - thanks.
-CLIENTS = {'htmlshark' : {'version' : '20120312',
-                          'token' : 'breakfastBurritos'},
-           'jsqueue' : {'version' : '20120312.02',
-                        'token' : 'closeButNoCigar'}}
+CLIENTS = {'htmlshark' : {'version' : '20130520',
+                          'token' : 'nuggetsOfBaller'},
+           'jsqueue' : {'version' : '20130520',
+                        'token' : 'chickenFingers'}}
 # grooveshark country settings
 COUNTRY = {'ID': 221, 'CC1': 0, 'CC2': 0, 'CC3': 0, 'CC4': 0, 'DMA': 0, 'IPR': 0}
