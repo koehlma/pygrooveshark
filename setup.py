@@ -13,18 +13,24 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import os
+import sys
 
 from distutils.core import setup
-execfile('src/grooveshark/version.py')
 
-setup(name=__short_name__,
-      version=__version__,
-      description=__desc_short__,
-      long_description=__desc_long__,
-      author=__author__,
-      author_email=__email__,
-      url=__website__,
-      download_url=__download_url__,
+__path__ = os.path.dirname(__file__)
+sys.path.insert(0, os.path.join(__path__, 'src'))
+
+import grooveshark.version as version
+
+setup(name=version.__short_name__,
+      version=version.__version__,
+      description=version.__desc_short__,
+      long_description=version.__desc_long__,
+      author=version.__author__,
+      author_email=version.__email__,
+      url=version.__website__,
+      download_url=version.__download_url__,
       license='GPLv3+',
       packages=['grooveshark', 'grooveshark.classes'],
       package_dir={'': 'src'},
