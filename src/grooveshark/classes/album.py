@@ -88,8 +88,8 @@ class Album(object):
         """
         if self._songs is None:
             self._songs = [Song.from_response(song, self._connection) for song in \
-                           self._connection.request('albumGetSongs', {'albumID' : self.id, 'isVerified' : False, 'offset' : 0},
-                                                    self._connection.header('albumGetSongs'))[1]['songs']]
+                           self._connection.request('albumGetAllSongs', {'albumID' : self.id},
+                                                    self._connection.header('albumGetAllSongs'))[1]]
         return iter(self._songs)
     
     def export(self):
