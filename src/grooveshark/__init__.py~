@@ -371,7 +371,7 @@ class Client(object):
     def getSongByID(self, song_id):
 	stream = self.getStreamBySongID(song_id)
 	result = self.getSongByToken(stream['FileToken'])
-	return Song.from_response(result, self.connection)
+	return result
 
     def getStreamBySongID(self, song_id):
         result = self.connection.request('getStreamKeyFromSongIDEx', {'songID' :song_id, 'country' : self.connection.session.country,                                                                           'prefetch' : False, 'mobile' : False},                                              self.connection.header('getStreamKeyFromSongIDEx', 'jsqueue'))[1]
