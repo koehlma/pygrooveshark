@@ -63,6 +63,11 @@ class Song(object):
                    ALBUM_COVER_URL + song['CoverArtFilename'] if song['CoverArtFilename'] else None, song['TrackNum'] if 'TarckNum' in song else None, song['EstimateDuration'], song['Popularity'] if 'Popularity' in song else None, connection)
 
     @classmethod
+    def from_token(cls, song, connection):
+        return cls(song['SongID'], song['Name'] if 'Name' in song else song['SongName'], song['ArtistID'], song['ArtistName'], song['AlbumID'], song['AlbumName'],
+                   ALBUM_COVER_URL + song['CoverArtFilename'] if song['CoverArtFilename'] else None, None, song['EstimateDuration'], None, connection)
+
+    @classmethod
     def from_export(cls, export, connection):
         return cls(export['id'], export['name'], export['artist_id'], export['artist'], export['album_id'], export['album'], export['cover'],
                    export['track'], export['duration'], export['popularity'], connection)
