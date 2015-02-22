@@ -60,7 +60,7 @@ class Song(object):
     @classmethod
     def from_response(cls, song, connection):
         return cls(song['SongID'], song['Name'] if 'Name' in song else song['SongName'], song['ArtistID'], song['ArtistName'], song['AlbumID'], song['AlbumName'],
-                   ALBUM_COVER_URL + song['CoverArtFilename'] if song['CoverArtFilename'] else None, song['TrackNum'], song['EstimateDuration'], song['Popularity'], connection)
+                   ALBUM_COVER_URL + song['CoverArtFilename'] if song['CoverArtFilename'] else None, song.get('TackNum', None), song['EstimateDuration'], song.get('Popularity', None), connection)
 
     @classmethod
     def from_export(cls, export, connection):
