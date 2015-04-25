@@ -4,3 +4,4 @@
 .settings
 .directory
 __pycache__
+.idea
