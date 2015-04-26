@@ -20,6 +20,7 @@ import threading
 
 from grooveshark.const import *
 
+
 class Song(object):
     """
     Represents a song.
@@ -37,7 +38,19 @@ class Song(object):
     :param popularity: popularity
     :param connection: underlying :class:`Connection` object
     """
-    def __init__(self, id, name, artist_id, artist_name, album_id, album_name, cover_url, track, duration, popularity, connection):
+    def __init__(
+            self,
+            id,
+            name,
+            artist_id,
+            artist_name,
+            album_id,
+            album_name,
+            cover_url,
+            track,
+            duration,
+            popularity,
+            connection):
         self._connection = connection
         self._id = id
         self._name = name
@@ -59,13 +72,21 @@ class Song(object):
 
     @classmethod
     def from_response(cls, song, connection):
-        return cls(song['SongID'], song['Name'] if 'Name' in song else song['SongName'], song['ArtistID'], song['ArtistName'], song['AlbumID'], song['AlbumName'],
-                   ALBUM_COVER_URL + song['CoverArtFilename'] if song['CoverArtFilename'] else None, song.get('TackNum', None), song['EstimateDuration'], song.get('Popularity', None), connection)
+        return cls(
+            song['SongID'], song['Name'] if 'Name' in song else
+            song['SongName'], song['ArtistID'], song['ArtistName'],
+            song['AlbumID'], song['AlbumName'],
+            ALBUM_COVER_URL + song['CoverArtFilename'] if
+            song['CoverArtFilename'] else None, song.get('TackNum', None),
+            song['EstimateDuration'], song.get('Popularity', None), connection)
 
     @classmethod
     def from_export(cls, export, connection):
-        return cls(export['id'], export['name'], export['artist_id'], export['artist'], export['album_id'], export['album'], export['cover'],
-                   export['track'], export['duration'], export['popularity'], connection)
+        return cls(
+            export['id'], export['name'], export['artist_id'],
+            export['artist'], export['album_id'], export['album'],
+            export['cover'], export['track'], export['duration'],
+            export['popularity'], connection)
 
     @property
     def id(self):
@@ -87,7 +108,8 @@ class Song(object):
         artist as :class:`Artist` object
         """
         if not self._artist:
-            self._artist = Artist(self._artist_id, self._artist_name, self._connection)
+            self._artist = Artist(self._artist_id, self._artist_name,
+                                  self._connection)
         return self._artist
 
     @property
@@ -96,7 +118,9 @@ class Song(object):
         album as :class:`Album` object
         """
         if not self._album:
-            self._album = Album(self._album_id, self._album_name, self._artist_id, self._artist_name, self._cover_url, self._connection)
+            self._album = Album(self._album_id, self._album_name,
+                                self._artist_id, self._artist_name,
+                                self._cover_url, self._connection)
         return self._album
 
     @property
@@ -126,19 +150,22 @@ class Song(object):
         :class:`Stream` object for playing
         """
         # Add song to queue
-        self._connection.request('addSongsToQueue',
-                                 {'songIDsArtistIDs': [{'artistID': self.artist.id,
-                                                        'source': 'user',
-                                                        'songID': self.id,
-                                                        'songQueueSongID': 1}],
-                                  'songQueueID': self._connection.session.queue},
-                                 self._connection.header('addSongsToQueue', 'jsqueue'))
+        self._connection.request(
+            'addSongsToQueue',
+            {'songIDsArtistIDs': [{'artistID': self.artist.id,
+                                   'source': 'user',
+                                   'songID': self.id,
+                                   'songQueueSongID': 1}],
+             'songQueueID': self._connection.session.queue},
+            self._connection.header('addSongsToQueue', 'jsqueue'))
 
-
-        stream_info = self._connection.request('getStreamKeyFromSongIDEx', {'songID' : self.id, 'country' : self._connection.session.country,
-                                                                            'prefetch' : False, 'mobile' : False},
-                                               self._connection.header('getStreamKeyFromSongIDEx', 'jsqueue'))[1]
-        return Stream(stream_info['ip'], stream_info['streamKey'], self._connection)
+        stream_info = self._connection.request(
+            'getStreamKeyFromSongIDEx',
+            {'songID': self.id, 'country': self._connection.session.country,
+             'prefetch': False, 'mobile': False},
+            self._connection.header('getStreamKeyFromSongIDEx', 'jsqueue'))[1]
+        return Stream(stream_info['ip'], stream_info['streamKey'],
+                      self._connection)
 
     def export(self):
         """
@@ -146,9 +173,11 @@ class Song(object):
         Use the :meth:`from_export` method to recreate the
         :class:`Song` object.
         """
-        return {'id' : self.id, 'name' : self.name, 'artist' : self._artist_name, 'artist_id' : self._artist_id,
-                'album' : self._album_name, 'album_id' : self._album_id, 'track' : self.track,
-                'duration' : self.duration, 'popularity' : self.popularity, 'cover' : self._cover_url}
+        return {'id': self.id, 'name': self.name, 'artist': self._artist_name,
+                'artist_id': self._artist_id, 'album': self._album_name,
+                'album_id': self._album_id, 'track': self.track,
+                'duration': self.duration, 'popularity': self.popularity,
+                'cover': self._cover_url}
 
     def format(self, pattern):
         """
@@ -161,7 +190,15 @@ class Song(object):
         pattern = pattern.replace('%a', self.artist.name)
         pattern = pattern.replace('%s', self.name)
         pattern = pattern.replace('%A', self.album.name)
-        return pattern.replace('/', '').replace('\\', '').replace(":","").replace("*","").replace("?","").replace('"',"").replace("|","").replace("<","").replace(">","")
+        return pattern.replace('/', '') \
+                      .replace('\\', '') \
+                      .replace(":", "") \
+                      .replace("*", "") \
+                      .replace("?", "") \
+                      .replace('"', "") \
+                      .replace("|", "") \
+                      .replace("<", "") \
+                      .replace(">", "")
 
     def download(self, directory='~/Music', song_name='%a - %s - %A'):
         """
@@ -187,15 +224,15 @@ class Song(object):
         :return: The raw song data.
         """
         def _markStreamKeyOver30Seconds(stream):
-            self._connection.request('markStreamKeyOver30Seconds',
-                                     {'streamServerID': stream.ip,
-                                      'artistID': self.artist.id,
-                                      'songQueueID': self._connection.session.queue,
-                                      'songID': self.id,
-                                      'songQueueSongID': 1,
-                                      'streamKey': stream.key},
-                                     self._connection.header('markStreamKeyOver30Seconds',
-                                                             'jsqueue'))
+            self._connection.request(
+                'markStreamKeyOver30Seconds',
+                {'streamServerID': stream.ip,
+                 'artistID': self.artist.id,
+                 'songQueueID': self._connection.session.queue,
+                 'songID': self.id,
+                 'songQueueSongID': 1,
+                 'streamKey': stream.key},
+                self._connection.header('markStreamKeyOver30Seconds', 'jsqueue'))
 
         stream = self.stream
         timer = threading.Timer(30, _markStreamKeyOver30Seconds, [stream])
@@ -203,18 +240,18 @@ class Song(object):
         raw = stream.data.read()
         if len(raw) == stream.size:
             timer.cancel()
-            self._connection.request('markSongDownloadedEx',
-                                     {'streamServerID': stream.ip,
-                                      'songID': self.id,
-                                      'streamKey': stream.key},
-                                     self._connection.header('markSongDownloadedEx',
-                                                             'jsqueue'))
-            self._connection.request('removeSongsFromQueue',
-                                     {'userRemoved':True,
-                                      'songQueueID': self._connection.session.queue,
-                                      'songQueueSongIDs': [1]},
-                                     self._connection.header('removeSongsFromQueue',
-                                                             'jsqueue'))
+            self._connection.request(
+                'markSongDownloadedEx',
+                {'streamServerID': stream.ip,
+                 'songID': self.id,
+                 'streamKey': stream.key},
+                self._connection.header('markSongDownloadedEx', 'jsqueue'))
+            self._connection.request(
+                'removeSongsFromQueue',
+                {'userRemoved': True,
+                 'songQueueID': self._connection.session.queue,
+                 'songQueueSongIDs': [1]},
+                self._connection.header('removeSongsFromQueue', 'jsqueue'))
             return raw
         else:
             raise ValueError("Content-Length {}, but read {}"

@@ -26,11 +26,12 @@ else:
 
 from grooveshark.const import *
 
+
 class Picture(object):
     """
     Could be an album cover or a user picture.
     Do not use this class directly.
-        
+
     :param url: image url
     """
     def __init__(self, url, connection):
@@ -38,21 +39,21 @@ class Picture(object):
         self._connection = connection
         self._data = None
         self._type = self._url.split('.').pop()
-    
+
     @property
     def type(self):
         """
         image type for example png or jpg
         """
         return self._type
-    
+
     @property
     def data(self):
         """
         raw image data
         """
         if self._data is None:
-            request = urllib.Request(self._url, headers={'User-Agent' : USER_AGENT})
+            request = urllib.Request(self._url, headers={'User-Agent': USER_AGENT})
             with contextlib.closing(self._connection.urlopen(request)) as response:
                 self._data = response.read()
         return self._data

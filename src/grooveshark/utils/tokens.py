@@ -21,10 +21,12 @@ import subprocess
 import tempfile
 import urllib.request
 
+
 def htmlshark():
     app = urllib.request.urlopen('http://static.a.gs-cdn.net/gs/app.js').read().decode('utf-8')
     token = re.search('revToken\s*:\s*"([a-zA-Z]+)"', app).group(1)
     return token
+
 
 def jsqueue():
     with tempfile.NamedTemporaryFile() as queue:

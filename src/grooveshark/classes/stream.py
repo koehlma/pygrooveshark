@@ -26,6 +26,7 @@ else:
 
 from grooveshark.const import *
 
+
 class Stream(object):
     """
     Get song's raw data.
@@ -43,8 +44,10 @@ class Stream(object):
         self._size = None
 
     def _request(self):
-        request = urllib.Request('http://%s/stream.php' % (self._ip), data=urlencode({'streamKey' : self._key}).encode('utf-8'),
-                                         headers={'User-Agent' : USER_AGENT})
+        request = urllib.Request(
+            'http://%s/stream.php' % (self._ip),
+            data=urlencode({'streamKey': self._key}).encode('utf-8'),
+            headers={'User-Agent': USER_AGENT})
         self._data = self._connection.urlopen(request)
         self._size = int(self.data.info()['Content-Length'])
 
@@ -67,7 +70,8 @@ class Stream(object):
         """
         stream URL
         """
-        return 'http://%s/stream.php?streamKey=%s' % (self._ip, quote_plus(self._key))
+        return 'http://%s/stream.php?streamKey=%s' % (self._ip,
+                                                      quote_plus(self._key))
 
     @property
     def data(self):
