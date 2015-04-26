@@ -34,11 +34,18 @@ import grooveshark.const
 from grooveshark.classes import *
 from grooveshark.version import *
 
-__all__ = ['Session', 'Client', 'Connection', 'GroovesharkError', 'RequestError', 'UnknownError']
+__all__ = [
+    'Session',
+    'Client',
+    'Connection',
+    'GroovesharkError',
+    'RequestError',
+    'UnknownError']
 
 class GroovesharkError(Exception): pass
 class RequestError(GroovesharkError): pass
 class UnknownError(GroovesharkError): pass
+
 
 class Session():
     def __init__(self):
@@ -62,6 +69,7 @@ class Session():
         with open(filename, 'wb') as output:
             pickle.dump(self, output)
 
+
 class Connection():
     '''
     Lowlevel API communication.
@@ -83,20 +91,25 @@ class Connection():
         '''
         generates json http request headers
         '''
-        return {'Cookie' : 'PHPSESSID=' + self.session.session, 'Content-Type' : 'application/json',
-                'User-Agent' : grooveshark.const.USER_AGENT, 'Content-Type' : 'application/json'}
+        return {
+            'Cookie': 'PHPSESSID=' + self.session.session,
+            'Content-Type': 'application/json',
+            'User-Agent': grooveshark.const.USER_AGENT,
+            'Content-Type': 'application/json'}
 
     def _get_token(self):
         '''
         requests an communication token from Grooveshark
         '''
-        self.session.token = self.request('getCommunicationToken', {'secretKey' : self.session.secret},
-                                          {'uuid' :self.session.user,
-                                           'session' : self.session.session,
-                                           'clientRevision' : grooveshark.const.CLIENTS['htmlshark']['version'],
-                                           'country' : self.session.country,
-                                           'privacy' : 0,
-                                           'client' : 'htmlshark'})[1]
+        self.session.token = self.request(
+            'getCommunicationToken',
+            {'secretKey': self.session.secret},
+            {'uuid': self.session.user,
+             'session': self.session.session,
+             'clientRevision': grooveshark.const.CLIENTS['htmlshark']['version'],
+             'country': self.session.country,
+             'privacy': 0,
+             'client': 'htmlshark'})[1]
         self.session.time = time.time()
 
     def _request_token(self, method, client):
@@ -124,21 +137,29 @@ class Connection():
         '''
         request queue id
         '''
-        self.session.queue = self.request('initiateQueue', None, self.header('initiateQueue', 'jsqueue'))[1]
+        self.session.queue = self.request(
+            'initiateQueue',
+            None,
+            self.header('initiateQueue', 'jsqueue'))[1]
 
     def request(self, method, parameters, header):
         '''
         Grooveshark API request
         '''
-        data = json.dumps({'parameters' : parameters, 'method' : method, 'header' : header})
-        request = urllib.Request('https://grooveshark.com/more.php?%s' % (method),
-                                         data=data.encode('utf-8'), headers=self._json_request_header())
+        data = json.dumps({
+            'parameters': parameters,
+            'method': method,
+            'header': header})
+        request = urllib.Request(
+            'https://grooveshark.com/more.php?%s' % (method),
+            data=data.encode('utf-8'), headers=self._json_request_header())
         with contextlib.closing(self.urlopen(request)) as response:
             result = json.loads(response.read().decode('utf-8'))
             if 'result' in result:
                 return response.info(), result['result']
             elif 'fault' in result:
-                raise RequestError(result['fault']['message'], result['fault']['code'])
+                raise RequestError(result['fault']['message'],
+                                   result['fault']['code'])
             else:
                 raise UnknownError(result)
 
@@ -146,13 +167,14 @@ class Connection():
         '''
         generates Grooveshark API Json header
         '''
-        return {'token' : self._request_token(method, client),
-                'privacy' : 0,
-                'uuid' : self.session.user,
-                'clientRevision' : grooveshark.const.CLIENTS[client]['version'],
-                'session' : self.session.session,
-                'client' : client,
-                'country' : self.session.country}
+        return {'token': self._request_token(method, client),
+                'privacy': 0,
+                'uuid': self.session.user,
+                'clientRevision': grooveshark.const.CLIENTS[client]['version'],
+                'session': self.session.session,
+                'client': client,
+                'country': self.session.country}
+
 
 class Client(object):
     '''
@@ -207,55 +229,58 @@ class Client(object):
 
         Genres:
 
-        This list is incomplete because there isn't an English translation for some genres.
+        This list is incomplete because there isn't an English translation for
+        some genres.
         Please look at the sources for all possible Tags.
 
-        +-------------------------------------+---------------------------------+
-        | Constant                            | Genre                           |
-        +=====================================+=================================+
-        | :const:`Radio.GENRE_RNB`            | R and B                         |
-        +-------------------------------------+---------------------------------+
-        | :const:`Radio.GENRE_JAZZ`           | Jazz                            |
-        +-------------------------------------+---------------------------------+
-        | :const:`Radio.GENRE_ROCK`           | Rock                            |
-        +-------------------------------------+---------------------------------+
-        | :const:`Radio.GENRE_CLASSICAL`      | Classical                       |
-        +-------------------------------------+---------------------------------+
-        | :const:`Radio.GENRE_DUBSTEP`        | Dubstep                         |
-        +-------------------------------------+---------------------------------+
-        | :const:`Radio.GENRE_BLUES`          | Blues                           |
-        +-------------------------------------+---------------------------------+
-        | :const:`Radio.GENRE_FOLK`           | Folk                            |
-        +-------------------------------------+---------------------------------+
-        | :const:`Radio.GENRE_ELECTRONICA`    | Electronica                     |
-        +-------------------------------------+---------------------------------+
-        | :const:`Radio.GENRE_CHRISTMAS`      | Christmas                       |
-        +-------------------------------------+---------------------------------+
-        | :const:`Radio.GENRE_OLDIES`         | Oldies                          |
-        +-------------------------------------+---------------------------------+
-        | :const:`Radio.GENRE_COUNTRY`        | Country                         |
-        +-------------------------------------+---------------------------------+
-        | :const:`Radio.GENRE_EXPERIMENTAL`   | Experimental                    |
-        +-------------------------------------+---------------------------------+
-        | :const:`Radio.GENRE_POP`            | Pop                             |
-        +-------------------------------------+---------------------------------+
-        | :const:`Radio.GENRE_INDIE`          | Indie                           |
-        +-------------------------------------+---------------------------------+
-        | :const:`Radio.GENRE_BLUEGRASS`      | Bluegrass                       |
-        +-------------------------------------+---------------------------------+
-        | :const:`Radio.GENRE_RAP`            | Rap                             |
-        +-------------------------------------+---------------------------------+
-        | :const:`Radio.GENRE_AMBIENT`        | Ambient                         |
-        +-------------------------------------+---------------------------------+
-        | :const:`Radio.GENRE_TRANCE`         | Trance                          |
-        +-------------------------------------+---------------------------------+
-        | :const:`Radio.GENRE_REGGAE`         | Reggae                          |
-        +-------------------------------------+---------------------------------+
-        | :const:`Radio.GENRE_METAL`          | Metal                           |
-        +-------------------------------------+---------------------------------+
+        +-------------------------------------+-------------------------------+
+        | Constant                            | Genre                         |
+        +=====================================+===============================+
+        | :const:`Radio.GENRE_RNB`            | R and B                       |
+        +-------------------------------------+-------------------------------+
+        | :const:`Radio.GENRE_JAZZ`           | Jazz                          |
+        +-------------------------------------+-------------------------------+
+        | :const:`Radio.GENRE_ROCK`           | Rock                          |
+        +-------------------------------------+-------------------------------+
+        | :const:`Radio.GENRE_CLASSICAL`      | Classical                     |
+        +-------------------------------------+-------------------------------+
+        | :const:`Radio.GENRE_DUBSTEP`        | Dubstep                       |
+        +-------------------------------------+-------------------------------+
+        | :const:`Radio.GENRE_BLUES`          | Blues                         |
+        +-------------------------------------+-------------------------------+
+        | :const:`Radio.GENRE_FOLK`           | Folk                          |
+        +-------------------------------------+-------------------------------+
+        | :const:`Radio.GENRE_ELECTRONICA`    | Electronica                   |
+        +-------------------------------------+-------------------------------+
+        | :const:`Radio.GENRE_CHRISTMAS`      | Christmas                     |
+        +-------------------------------------+-------------------------------+
+        | :const:`Radio.GENRE_OLDIES`         | Oldies                        |
+        +-------------------------------------+-------------------------------+
+        | :const:`Radio.GENRE_COUNTRY`        | Country                       |
+        +-------------------------------------+-------------------------------+
+        | :const:`Radio.GENRE_EXPERIMENTAL`   | Experimental                  |
+        +-------------------------------------+-------------------------------+
+        | :const:`Radio.GENRE_POP`            | Pop                           |
+        +-------------------------------------+-------------------------------+
+        | :const:`Radio.GENRE_INDIE`          | Indie                         |
+        +-------------------------------------+-------------------------------+
+        | :const:`Radio.GENRE_BLUEGRASS`      | Bluegrass                     |
+        +-------------------------------------+-------------------------------+
+        | :const:`Radio.GENRE_RAP`            | Rap                           |
+        +-------------------------------------+-------------------------------+
+        | :const:`Radio.GENRE_AMBIENT`        | Ambient                       |
+        +-------------------------------------+-------------------------------+
+        | :const:`Radio.GENRE_TRANCE`         | Trance                        |
+        +-------------------------------------+-------------------------------+
+        | :const:`Radio.GENRE_REGGAE`         | Reggae                        |
+        +-------------------------------------+-------------------------------+
+        | :const:`Radio.GENRE_METAL`          | Metal                         |
+        +-------------------------------------+-------------------------------+
         '''
-        artists = self.connection.request('getArtistsForTagRadio', {'tagID' : radio},
-                                          self.connection.header('getArtistsForTagRadio', 'jsqueue'))[1]
+        artists = self.connection.request(
+            'getArtistsForTagRadio',
+            {'tagID': radio},
+            self.connection.header('getArtistsForTagRadio', 'jsqueue'))[1]
         return Radio(artists, radio, self.connection)
 
     def _parse_album(self, album):
@@ -263,20 +288,32 @@ class Client(object):
         Parse search json-data and create an :class:`Album` object.
         '''
         if album['CoverArtFilename']:
-            cover_url = '%sm%s' % (grooveshark.const.ALBUM_COVER_URL, album['CoverArtFilename'])
+            cover_url = '%sm%s' % (grooveshark.const.ALBUM_COVER_URL,
+                                   album['CoverArtFilename'])
         else:
             cover_url = None
-        return Album(album['AlbumID'], album['Name'], album['ArtistID'], album['ArtistName'], cover_url, self.connection)
+        return Album(
+            album['AlbumID'],
+            album['Name'],
+            album['ArtistID'],
+            album['ArtistName'],
+            cover_url,
+            self.connection)
 
     def _parse_playlist(self, playlist):
         '''
         Parse search json-data and create a :class:`Playlist` object.
         '''
         if playlist['Picture']:
-            cover_url = '%s70_%s' % (grooveshark.const.PLAYLIST_COVER_URL, playlist['Picture'])
+            cover_url = '%s70_%s' % (grooveshark.const.PLAYLIST_COVER_URL,
+                                     playlist['Picture'])
         else:
             cover_url = None
-        return Playlist(playlist['PlaylistID'], playlist['Name'], cover_url, self.connection)
+        return Playlist(
+            playlist['PlaylistID'],
+            playlist['Name'],
+            cover_url,
+            self.connection)
 
     def search(self, query, type=SONGS):
         '''
@@ -300,12 +337,16 @@ class Client(object):
         | :const:`Client.PLAYLISTS`       | Search for playlists            |
         +---------------------------------+---------------------------------+
         '''
-        result = self.connection.request('getResultsFromSearch', {'query' : query, 'type' : type, 'guts' : 0, 'ppOverride' : False},
-                                         self.connection.header('getResultsFromSearch'))[1]['result']
+        result = self.connection.request(
+            'getResultsFromSearch',
+            {'query': query, 'type': type, 'guts': 0, 'ppOverride': False},
+            self.connection.header('getResultsFromSearch'))[1]['result']
         if type == self.SONGS:
-            return (Song.from_response(song, self.connection) for song in result)
+            return (Song.from_response(song, self.connection)
+                    for song in result)
         elif type == self.ARTISTS:
-            return (Artist(artist['ArtistID'], artist['Name'], self.connection) for artist in result)
+            return (Artist(artist['ArtistID'], artist['Name'], self.connection)
+                    for artist in result)
         elif type == self.ALBUMS:
             return (self._parse_album(album) for album in result)
         elif type == self.PLAYLISTS:
@@ -320,15 +361,18 @@ class Client(object):
 
         Time periods:
 
-        +---------------------------------+-------------------------------------+
-        | Constant                        | Meaning                             |
-        +=================================+=====================================+
-        | :const:`Client.DAILY`           | Popular songs of this day           |
-        +---------------------------------+-------------------------------------+
-        | :const:`Client.MONTHLY`         | Popular songs of this month         |
-        +---------------------------------+-------------------------------------+
+        +---------------------------------+-----------------------------------+
+        | Constant                        | Meaning                           |
+        +=================================+===================================+
+        | :const:`Client.DAILY`           | Popular songs of this day         |
+        +---------------------------------+-----------------------------------+
+        | :const:`Client.MONTHLY`         | Popular songs of this month       |
+        +---------------------------------+-----------------------------------+
         '''
-        songs = self.connection.request('popularGetSongs', {'type' : period}, self.connection.header('popularGetSongs'))[1]['Songs']
+        songs = self.connection.request(
+            'popularGetSongs',
+            {'type': period},
+            self.connection.header('popularGetSongs'))[1]['Songs']
         return (Song.from_response(song, self.connection) for song in songs)
 
     def playlist(self, playlist_id):
@@ -338,7 +382,10 @@ class Client(object):
         :param playlist_id: ID of the playlist
         :rtype: a :class:`Playlist` object
         '''
-        playlist = self.connection.request('getPlaylistByID', {'playlistID' : playlist_id}, self.connection.header('getPlaylistByID'))[1]
+        playlist = self.connection.request(
+            'getPlaylistByID',
+            {'playlistID': playlist_id},
+            self.connection.header('getPlaylistByID'))[1]
         return self._parse_playlist(playlist)
 
     def collection(self, user_id):
@@ -348,8 +395,9 @@ class Client(object):
         :param user_id: ID of a user.
         :rtype: list of :class:`Song`
         """
-        # TODO further evaluation of the page param, I don't know where the limit is.
-        dct = {'userID' : user_id, 'page' : 0}
+        # TODO further evaluation of the page param, I don't know where the
+        # limit is.
+        dct = {'userID': user_id, 'page': 0}
         r = 'userGetSongsInLibrary'
         result = self.connection.request(r, dct, self.connection.header(r))
         songs = result[1]['Songs']
@@ -362,20 +410,20 @@ class Client(object):
         :param user_id: ID of a user.
         :rtype: list of :class:`Song`
         """
-        dct = {'userID' : user_id, "ofWhat" : "Songs"}
+        dct = {'userID': user_id, "ofWhat": "Songs"}
         r = 'getFavorites'
         result = self.connection.request(r, dct, self.connection.header(r))
         songs = result[1]
         return [Song.from_response(song, self.connection) for song in songs]
-    
+
     def get_song_by_id(self, song_id):
-        parameters =  {'songID': song_id,
-                       'country': self.connection.session.country}
+        parameters = {'songID': song_id,
+                      'country': self.connection.session.country}
         header = self.connection.header('getTokenForSong')
         result = self.connection.request('getTokenForSong', parameters,
                                          header)
         return self.get_song_by_token(result[1]['Token'])
-    
+
     def get_song_by_token(self, song_token):
         parameters = {'token': song_token,
                       'country': self.connection.session.country}

@@ -15,11 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+
 class Artist(object):
     """
     Represents an artist.
     Do not use this class directly.
-        
+
     :param id: internal artist id
     :param name: name
     :param connection: underlying :class:`Connection` object
@@ -30,10 +31,10 @@ class Artist(object):
         self._name = name
         self._similar = None
         self._songs = None
-        
+
     def __str__(self):
         return self.name
-    
+
     @classmethod
     def from_export(cls, export, connection):
         return cls(export['id'], export['name'], connection)
@@ -44,7 +45,7 @@ class Artist(object):
         internal artist id
         """
         return self._id
-    
+
     @property
     def name(self):
         """
@@ -58,28 +59,33 @@ class Artist(object):
         iterator over similar artists as :class:`Artist` objects
         """
         if self._similar is None:
-            self._similar = [Artist(artist['ArtistID'], artist['Name'], self._connection) for artist in \
-                             self._connection.request('artistGetSimilarArtists', {'artistID' : self.id},
-                                                      self._connection.header('artistGetSimilarArtists'))[1]['SimilarArtists']]
+            self._similar = [
+                Artist(artist['ArtistID'], artist['Name'], self._connection)
+                for artist in self._connection.request(
+                    'artistGetSimilarArtists',
+                    {'artistID': self.id},
+                    self._connection.header('artistGetSimilarArtists'))[1]['SimilarArtists']]
         return iter(self._similar)
-    
+
     @property
     def songs(self):
         """
         iterator over artist's songs as :class:`Song` objects
         """
         if self._songs is None:
-            self._songs = [Song.from_response(song, self._connection) for song in \
-                           self._connection.request('artistGetArtistSongs', {'artistID' : self.id},
-                                                    self._connection.header('artistGetArtistSongs'))[1]]
+            self._songs = [Song.from_response(song, self._connection) for song in
+                           self._connection.request(
+                               'artistGetArtistSongs',
+                               {'artistID': self.id},
+                               self._connection.header('artistGetArtistSongs'))[1]]
         return iter(self._songs)
-    
+
     def export(self):
         """
         Returns a dictionary with all artist information.
         Use the :meth:`from_export` method to recreate the
         :class:`Artist` object.
         """
-        return {'id' : self.id, 'name' : self.name}
-    
+        return {'id': self.id, 'name': self.name}
+
 from grooveshark.classes.song import Song

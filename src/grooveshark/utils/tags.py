@@ -18,9 +18,15 @@
 import json
 import urllib.request
 
+TAG_URL = 'http://grooveshark.com/gs/models/tags_with_ids.json'
+TRANSLATE_URL = 'http://static.a.gs-cdn.net/locales/gs-en.json'
+
+
 def tags():
-    tags = json.loads(urllib.request.urlopen('http://grooveshark.com/gs/models/tags_with_ids.json').read().decode('utf-8'))
-    translation = json.loads(urllib.request.urlopen('http://static.a.gs-cdn.net/locales/gs-en.json').read().decode('utf-8')[len('localeCallback_en('):-len(');')])
+    tags = json.loads(urllib.request.urlopen(TAG_URL).read().decode('utf-8'))
+    translation = json.loads(
+        urllib.request.urlopen(TRANSLATE_URL)
+        .read().decode('utf-8')[len('localeCallback_en('):-len(');')])
     return tags, translation
 
 if __name__ == '__main__':
@@ -30,10 +36,12 @@ if __name__ == '__main__':
         print('    GENRE_{} = {}'.format(tag.upper(), number))
     print('\n')
     print('Documentation:')
-    print('    +-------------------------------------+---------------------------------+')
-    print('    | Constant                            | Genre                           |')
-    print('    +=====================================+=================================+')
+    print('    +-------------------------------------+-------------------------------+')
+    print('    | Constant                            | Genre                         |')
+    print('    +=====================================+===============================+')
     for tag in tags:
         if 'STATION_' + tag.upper() in translation:
-            print('    | {:<36}| {:<32}|'.format(':const:`Radio.GENRE_' + tag.upper() + '`', translation['STATION_' + tag.upper()].replace('&amp;', ' and ')))
-            print('    +-------------------------------------+---------------------------------+')
+            print('    | {:<36}| {:<32}|'.format(
+                ':const:`Radio.GENRE_' + tag.upper() + '`',
+                translation['STATION_' + tag.upper()].replace('&amp;', ' and ')))
+            print('    +-------------------------------------+-------------------------------+')
