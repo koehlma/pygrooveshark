@@ -30,6 +30,7 @@ import datetime
 import http.server
 import json
 import os.path
+import pprint
 import re
 import ssl
 import socketserver
@@ -151,6 +152,7 @@ class Analyzer():
         if self.output_directory:
             now = datetime.datetime.today()
             name = now.strftime('%m_%d_%Y_%H:%m:%S_%s_%f')
+
             request_filename = os.path.join(self.output_directory, name +
                                             '.request')
             with open(request_filename, 'wb') as request_file:
@@ -158,6 +160,7 @@ class Analyzer():
                 request_file.write(str(handler.headers).encode('ascii'))
                 if data:
                     request_file.write(data)
+
             response_filename = os.path.join(self.output_directory, name +
                                              '.response')
             with open(response_filename, 'wb') as response_file:
@@ -169,7 +172,11 @@ class Analyzer():
                     response_file.write(b': ')
                     response_file.write(value.encode('ascii'))
                 response_file.write(b'\r\n\r\n')
-                response_file.write(response.content)
+                try:
+                    content = pprint.pformat(response.json())
+                    response_file.write(content.encode('utf-8'))
+                except ValueError:
+                    response_file.write(response.content)
 
         handler.send_response(response.status_code)
         for key, value in response.headers.items():
