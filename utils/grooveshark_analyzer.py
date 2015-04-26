@@ -26,6 +26,7 @@ through it. It will then show you some useful information about API calls.
 """
 
 import argparse
+import datetime
 import http.server
 import json
 import os.path
@@ -90,9 +91,10 @@ class Server(socketserver.ThreadingTCPServer):
 
 
 class Analyzer():
-    def __init__(self):
+    def __init__(self, output_directory):
         self.sessions = {}
         self.lock = threading.Lock()
+        self.output_directory = output_directory
 
     def _analyze_api(self, url, data, handler, response, session_id):
         request = json.loads(data.decode('utf-8'))
@@ -146,6 +148,29 @@ class Analyzer():
         response = requests.request(handler.command, handler.path, data=data,
                                     headers=handler.headers)
 
+        if self.output_directory:
+            now = datetime.datetime.today()
+            name = now.strftime('%m_%d_%Y_%H:%m:%S_%s_%f')
+            request_filename = os.path.join(self.output_directory, name +
+                                            '.request')
+            with open(request_filename, 'wb') as request_file:
+                request_file.write(handler.requestline.encode('ascii'))
+                request_file.write(str(handler.headers).encode('ascii'))
+                if data:
+                    request_file.write(data)
+            response_filename = os.path.join(self.output_directory, name +
+                                             '.response')
+            with open(response_filename, 'wb') as response_file:
+                response_file.write(str(response.status_code).encode('ascii'))
+                response_file.write((' ' + response.reason).encode('ascii'))
+                for key, value in response.headers.items():
+                    response_file.write(b'\r\n')
+                    response_file.write(key.encode('ascii'))
+                    response_file.write(b': ')
+                    response_file.write(value.encode('ascii'))
+                response_file.write(b'\r\n\r\n')
+                response_file.write(response.content)
+
         handler.send_response(response.status_code)
         for key, value in response.headers.items():
             if key == 'transfer-encoding':
@@ -174,6 +199,7 @@ def main():
     parser.add_argument('--host', default='127.0.0.1')
     parser.add_argument('--port', default=12345, type=int)
     parser.add_argument('--ssl', nargs=2, metavar=('KEY', 'CERT'))
+    parser.add_argument('-o', '--output-directory')
 
     args = parser.parse_args()
 
@@ -184,7 +210,7 @@ def main():
         ssl_key = os.path.join(__path__, 'ssl', 'gs.key')
         ssl_cert = os.path.join(__path__, 'ssl', 'gs.crt')
 
-    analyzer = Analyzer()
+    analyzer = Analyzer(args.output_directory)
 
     server = Server(analyzer, args.host, args.port, ssl_key, ssl_cert)
     server.serve_forever()
