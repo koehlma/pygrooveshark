@@ -17,202 +17,178 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>
 
 """
-This tool provides a Grooveshark analyzer. Basically it is a proxy for the API
-endpoint `*grooveshark.com/more.php*`. It displays all sniffed information
-nicely formatted and maintains an internal state of the API. Per request it
-displays:
-    * session id
-    * current communication token
-    * request method
-    * request client (htmlshark or jsqueue)
-    * the `uuid` of the session
-    * the `country` of the session
-    * request token
-    * request parameters
-    * request result
-The sniffed data can than be used by `grooveshark_get_secret.py` to extract the
-security tokens out of a memory dump.
+Grooveshark Analyzer
+--------------------
 
-To sniff the SSL encrypted API endpoint it uses it's own SSL certificates - you
-have to add these certificates to the list of trusted exceptions.
-
-Run this tool and configure FoxyProxy (Firefox AddOn) to route all requests to
-`*grooveshark.com/more.php*` through this proxy. Per default it listens on
-`127.0.0.1:12345`.
+Grooveshark Analyzer is a debug and reverse engineer proxy for the unofficial
+Grooveshark API. To use it you have to route all traffic to `grooveshark.com`
+through it. It will then show you some useful information about API calls.
 """
 
-__version__ = '1.0'
-
 import argparse
-import gzip
-import http.cookies
 import http.server
 import json
-import os
-import socketserver
+import os.path
+import re
 import ssl
+import socketserver
 import threading
-import urllib.request
 import urllib.parse
-import zlib
 
+import requests
+
+
+__version__ = '2.0'
 __path__ = os.path.dirname(__file__)
 
-# load the ssl certificate and the private key
-SSL_KEY = os.path.join(__path__, 'certs', 'server.key')
-SSL_CERT = os.path.join(__path__, 'certs', 'server.crt')
 
-class Proxy(http.server.BaseHTTPRequestHandler):
-    def __init__(self, connection, client_address, server, ssl=False):
-        self.ssl = ssl
+class Handler(http.server.BaseHTTPRequestHandler):
+    def __init__(self, connection, client_address, server, host=None):
+        self.host = host
         super().__init__(connection, client_address, server)
-    
-    def _grooveshark(self):
-        # parse cookies to extract the session id
-        cookies = http.cookies.SimpleCookie(self.headers['Cookie'])
-        session = getattr(cookies.get('PHPSESSID', None), 'value', None)
-        # read and parse the json api request
-        data = self.rfile.read(int(self.headers['Content-Length']))
-        api_request = json.loads(data.decode('utf-8'))
-        # build and open a new request to the real api
-        request = urllib.request.Request(self.path, data, self.headers)
-        request.get_method = lambda: self.command
-        try:
-            response = urllib.request.urlopen(request)
-        except urllib.request.URLError as error:
-            response = error
-        # redirect http status code and message
-        self.send_response(response.getcode(), response.msg)
-        # redirect http headers
-        for key, value in response.headers.items():
-            self.send_header(key, value)
-        self.end_headers()
-        # redirect the json result
-        data = response.read()
-        self.wfile.write(data)
-        # decompress the result
-        if response.headers['Content-Encoding'] == 'deflate':
-            data = zlib.decompress(data)
-        elif response.headers['Content-Encoding'] == 'gzip':
-            data = gzip.decompress(data)
-        # parse the json result into a python dictionary
-        api_response = json.loads(data.decode('utf-8'))
-        # check if the session already exists
-        if session not in self.server.sessions:
-            # create the new session
-            self.server.sessions[session] = {'token' : None}
-        # store the sessions communication token
-        if api_request['method'] == 'getCommunicationToken':
-            self.server.sessions[session]['token'] = api_response['result']
-        if self.server.methods is not None:
-            # check for a new method and display method information
-            if api_request['method'] not in self.server.methods:
-                with server.lock:
-                    self.server.methods.append(api_request['method'])
-                    print('--> New Method "{}":'.format(api_request['method']))
-                    print(('    --> Client: "{}"'
-                           ).format(api_request['header']['client']))
-                    print(('    --> Parameters: "{}"'
-                           ).format(('", "'
-                                     ).join(api_request['parameters'].keys())))
-        else:
-            # display request information
-            with server.lock:
-                print('--> Session "{}":'.format(session))
-                print(('    --> Communication Token: {}'
-                       ).format(self.server.sessions[session]['token']))
-                print('    --> Method: {}'.format(api_request['method']))
-                print(('    --> Client: {}/{}')
-                      .format(api_request['header']['client'],
-                              api_request['header']['clientRevision']))
-                print('    --> UUID: {}'.format(api_request['header']['uuid']))
-                print(('    --> Country: "{}"'
-                       ).format(api_request['header']['country']))
-                print(('    --> Token: {}'
-                       ).format(api_request['header']['token']))
-                print('    --> Parameters:')
-                for key, value in api_request['parameters'].items():
-                    print('        --> "{}" : "{}"'.format(key,
-                                                           str(value)[:80]))
-                print('    --> Result:')
-                if isinstance(api_response['result'], dict):
-                    for key, value in api_response['result'].items():
-                        print('        --> "{}" : "{}"'.format(key,
-                                                               str(value)[:80]))
-                elif isinstance(api_response['result'], list):
-                    for value in api_response['result']:
-                        print('        --> "{}"'.format(str(value)[:80]))
-                else:
-                    print('        --> "{}"'.format(str(api_response['result']
-                                                        )[:80])) 
-        
+
     def _proxy(self):
-        if self.ssl:
-            self.path = 'https://{}{}'.format(self.ssl, self.path)
-        self.url = urllib.parse.urlparse(self.path)
-        # this proxy only works for the grooveshark api endpoint
-        if (self.url.netloc.endswith('grooveshark.com') and
-            self.url.path.startswith('/more.php')):
-            self._grooveshark()
-        else:
-            self.send_error(500)
-    
+        if self.host:
+            self.path = 'https://' + self.host + self.path
+        url = urllib.parse.urlparse(self.path)
+        self.server.analyzer.analyze(url, self)
+
     def _connect(self):
-        # sniff the ssl connection using fake certificates
         self.send_response(200)
         self.end_headers()
         try:
             connection = ssl.wrap_socket(self.connection,
-                                         keyfile=server.ssl_key,
-                                         certfile=server.ssl_cert,
+                                         keyfile=self.server.ssl_key,
+                                         certfile=self.server.ssl_cert,
                                          server_side=True)
-            Proxy(connection, self.client_address, self.server,
-                  self.headers['Host'])
+            Handler(connection, self.client_address,
+                    self.server, self.headers['Host'])
         except ssl.SSLError:
             pass
-    
-    # disable logging
+
     def _dummy(self, *args, **kwargs):
         pass
-    
+
     log_request = _dummy
     log_error = _dummy
     log_message = _dummy
-    
-    # proxy get and post directly - fake certificates on connect
+
     do_GET = _proxy
     do_POST = _proxy
     do_CONNECT = _connect
 
-class ThreadingHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
-    pass
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description=('local analyzer proxy only '
-                                                  'for /more.php'))
+class Server(socketserver.ThreadingTCPServer):
+    allow_reuse_address = True
+
+    def __init__(self, analyzer, host='127.0.0.1', port=12345,
+                 ssl_key=None, ssl_cert=None):
+        self.analyzer = analyzer
+        self.ssl_key = ssl_key
+        self.ssl_cert = ssl_cert
+        super().__init__((host, port), Handler)
+
+
+class Analyzer():
+    def __init__(self):
+        self.sessions = {}
+        self.lock = threading.Lock()
+
+    def _analyze_api(self, url, data, handler, response, session_id):
+        request = json.loads(data.decode('utf-8'))
+        result = response.json().get('result', None)
+        if request['header']['session']:
+            session_id = request['header']['session']
+        if request['method'] == 'getCommunicationToken' and session_id:
+            self.sessions[session_id]['token'] = response['result']
+        with self.lock:
+            session = self.sessions[session_id]
+            client = request['header']['client']
+            client_revision = request['header']['clientRevision']
+            user_id = request['header']['uuid']
+            country = request['header']['country']
+            token = request['header']['token']
+            print('--> Session "{}":'.format(session_id))
+            print('    --> Communication Token:', session['token'])
+            print('    --> Method:', request['method'])
+            print('    --> Client:', client, client_revision)
+            print('    --> UUID:', user_id)
+            print('    --> Country:', country)
+            print('    --> Token:', token)
+            print('    --> Parameters:')
+            for key, value in request['parameters'].items():
+                print('        --> "{}" : "{}"'.format(key, str(value)[:80]))
+            if result:
+                print('    --> Result:')
+                if isinstance(result, dict):
+                    for key, value in result.items():
+                        str_value = str(value)[:80]
+                        print('        --> "{}" : "{}"'.format(key, str_value))
+                elif isinstance(result, list):
+                    for value in result:
+                        print('        --> "{}"'.format(str(value)[:80]))
+                else:
+                    print('        --> "{}"'.format(str(result)[:80]))
+
+    def _analyze_preload(self, url, data,  handler, response, session_id):
+        match = re.search(r'"getCommunicationToken"\s*:\s*"([0-9a-f]+)"',
+                          response.text)
+        if match and session_id:
+            self.sessions[session_id]['token'] = match.group(1)
+
+    def analyze(self, url, handler):
+        if handler.headers['Content-Length']:
+            length = int(handler.headers['Content-Length'])
+            data = handler.rfile.read(length)
+        else:
+            data = None
+
+        response = requests.request(handler.command, handler.path, data=data,
+                                    headers=handler.headers)
+
+        handler.send_response(response.status_code)
+        for key, value in response.headers.items():
+            if key == 'transfer-encoding':
+                continue
+            elif key == 'content-length':
+                continue
+            elif key == 'content-encoding':
+                continue
+            handler.send_header(key, value)
+        handler.send_header('Content-Length', len(response.content))
+        handler.end_headers()
+        handler.wfile.write(response.content)
+
+        session_id = response.cookies.get('PHPSESSID', None)
+        if session_id and session_id not in self.sessions:
+            self.sessions[session_id] = {'token': None}
+
+        if url.path.startswith('/more.php'):
+            self._analyze_api(url, data, handler, response, session_id)
+        elif url.path.startswith('/preload.php'):
+            self._analyze_preload(url, data, handler, response, session_id)
+
+
+def main():
+    parser = argparse.ArgumentParser()
     parser.add_argument('--host', default='127.0.0.1')
     parser.add_argument('--port', default=12345, type=int)
-    parser.add_argument('--ssl_key', help='ssl key for man in the middle',
-                        default=os.path.join(__path__, 'analyzer',
-                                             'grooveshark.key'))
-    parser.add_argument('--ssl_cert',
-                        help='ssl certificate for man in the middle',
-                        default=os.path.join(__path__, 'analyzer',
-                                             'grooveshark.crt'))
-    parser.add_argument('--methods', default=False, action='store_true',
-                        help='create a list of available methods')
-    
-    arguments = parser.parse_args()
-    
-    print('--> starting proxy')
-    print('--> listening on {}:{}'.format(arguments.host, arguments.port))
-    print('--> ssl key: {}'.format(arguments.ssl_key))
-    print('--> ssl certificate: {}'.format(arguments.ssl_cert))
-    
-    server = ThreadingHTTPServer((arguments.host, arguments.port), Proxy)
-    server.ssl_key = arguments.ssl_key
-    server.ssl_cert = arguments.ssl_cert
-    server.lock = threading.Lock()
-    server.methods = [] if arguments.methods else None
-    server.sessions = {}
+    parser.add_argument('--ssl', nargs=2, metavar=('KEY', 'CERT'))
+
+    args = parser.parse_args()
+
+    if args.ssl:
+        ssl_key = args.ssl[0]
+        ssl_cert = args.ssl[1]
+    else:
+        ssl_key = os.path.join(__path__, 'ssl', 'gs.key')
+        ssl_cert = os.path.join(__path__, 'ssl', 'gs.crt')
+
+    analyzer = Analyzer()
+
+    server = Server(analyzer, args.host, args.port, ssl_key, ssl_cert)
     server.serve_forever()
+
+
+if __name__ == '__main__':
+    main()
