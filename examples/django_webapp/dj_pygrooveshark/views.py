@@ -1,4 +1,4 @@
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render_to_response
 from django.http import HttpResponse, HttpResponseBadRequest
 from wsgiref.util import FileWrapper
 import simplejson as json
@@ -22,12 +22,17 @@ def index(request):
 
 def popular(request):
 
-    if not 'popular' in _cache:
-        _cache['popular'] =  (time.time(), [song.export() for song in client.popular()])
+    if 'popular' not in _cache:
+        _cache['popular'] = (
+            time.time(),
+            [song.export() for song in client.popular()])
     if time.time() - _cache['popular'][0] > 7200:
-        _cache['popular'] =  (time.time(), [song.export() for song in client.popular()])
+        _cache['popular'] = (
+            time.time(),
+            [song.export() for song in client.popular()])
 
-    return HttpResponse(json.dumps({'status' : 'success', 'result' : _cache['popular'][1]}))
+    return HttpResponse(
+        json.dumps({'status': 'success', 'result': _cache['popular'][1]}))
 
 
 def search(request):
@@ -42,7 +47,7 @@ def search(request):
         return HttpResponseBadRequest('unknown type')
 
     result = [obj.export() for obj in client.search(query, search_type)]
-    return HttpResponse(json.dumps({'status' : 'success', 'result' : result }))
+    return HttpResponse(json.dumps({'status': 'success', 'result': result}))
 
 
 def stream(request):
@@ -79,7 +84,8 @@ def stream(request):
         response['Accept-Ranges'] = 'bytes'
         response['Content-Type'] = stream.data.info()['Content-Type']
         response['Content-Length'] = str(stream.size)
-        response['Content-Range'] = 'bytes {}-{}/{}'.format(start_byte, end_byte, stream.size)
+        response['Content-Range'] = 'bytes {}-{}/{}'.format(
+            start_byte, end_byte, stream.size)
 
     else:
         cache.reset()
