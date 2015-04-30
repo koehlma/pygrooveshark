@@ -25,4 +25,4 @@ client.init()
 
 for song in client.popular():
     print(song)
-    subprocess.call(['cvlc', song.stream.url])
+    subprocess.call(['cvlc', '--play-and-exit', song.stream.url])
