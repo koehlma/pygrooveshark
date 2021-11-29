@@ -16,7 +16,7 @@ Please install [Ext JS 4](http://docs.sencha.com/extjs/4.2.2/) to `examples/weba
 * [popular_vlc.py](https://github.com/koehlma/pygrooveshark/blob/master/examples/popular_vlc.py)
 
 # Attention
-This module is only a proof of concept and not an offical part of Grooveshark.
+This module is only a proof of concept and not an official part of Grooveshark.
 Use it at your own risk.
 I am not responsible for any violations against the Grooveshark Terms of Service
 (It is not allowed to download music except for cache usage).
